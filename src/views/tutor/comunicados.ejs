@@ -1,0 +1,17 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-tutoria') %>
+<div class="grade-lateral">
+  <div>
+    <% if (!lista.length) { %><p class="vazio cartao">Nenhum comunicado enviado.</p><% } %>
+    <% lista.forEach((c) => { %><article class="cartao"><h3><%= c.titulo %></h3><p class="texto"><%= c.texto %></p><p class="meta">Para: <%= c.destinatarios %> · <%= f.dataHora(c.criado_em) %></p></article><% }) %>
+  </div>
+  <aside><section class="cartao destaque"><h2>Novo comunicado</h2>
+    <% if (!t.ativa) { %><p class="vazio">Tutoria finalizada.</p><% } else { %>
+    <form method="post" action="/tutor/tutorias/<%= t.id %>/comunicados" class="form"><%- include('../partials/csrf') %>
+      <label>Título<input name="titulo" required maxlength="120" placeholder="Ex.: Prazo da atividade se aproximando"></label>
+      <label>Mensagem<textarea name="texto" rows="4" required></textarea></label>
+      <fieldset class="bloco"><legend>Destinatários</legend><% t.tutorados.forEach((a) => { %><label class="opcao"><input type="checkbox" name="alunos" value="<%= a.id %>" checked><%= a.nome %></label><% }) %></fieldset>
+      <button class="botao primario largo">Enviar</button></form><% } %>
+  </section></aside>
+</div>
+<%- include('../partials/rodape') %>

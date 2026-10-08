@@ -1,0 +1,25 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-tutoria') %>
+<div class="grade-lateral">
+  <div>
+    <% if (!lista.length) { %><p class="vazio cartao">Nenhum material enviado.</p><% } %>
+    <% lista.forEach((m) => { %><article class="cartao"><div class="linha-acao"><h3><%= m.titulo %></h3>
+      <% if (t.ativa) { %><form method="post" action="/tutor/tutorias/<%= t.id %>/materiais/<%= m.id %>/excluir" data-confirmar="Excluir material?"><%- include('../partials/csrf') %><button class="botao link perigo pequeno">Excluir</button></form><% } %></div>
+      <p class="meta">Para: <%= m.destinatario_nome || 'todos os tutorados' %><%= m.conteudo_nome ? ' · ' + m.conteudo_nome : '' %> · <%= f.data(m.criado_em) %></p>
+      <% if (m.descricao) { %><p><%= m.descricao %></p><% } %>
+      <% if (m.link) { %><a class="anexo" href="<%= m.link %>" target="_blank" rel="noopener noreferrer"><%- include('../partials/icone',{nome:'globo'}) %><%= m.link %></a><% } %>
+      <% m.arquivos.forEach((a) => { %><a class="anexo" href="/arquivos/<%= a.id %>" target="_blank" rel="noopener"><%- include('../partials/icone',{nome:'clipe'}) %><%= a.nome_original %></a><% }) %></article><% }) %>
+  </div>
+  <aside><section class="cartao destaque"><h2>Novo material</h2>
+    <% if (!t.ativa) { %><p class="vazio">Tutoria finalizada.</p><% } else { %>
+    <form method="post" action="/tutor/tutorias/<%= t.id %>/materiais" class="form" enctype="multipart/form-data"><input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Título<input name="titulo" required maxlength="120"></label>
+      <label>Para<select name="aluno_id"><option value="">Todos os tutorados</option><% t.tutorados.forEach((a) => { %><option value="<%= a.id %>"><%= a.nome %></option><% }) %></select></label>
+      <label>Conteúdo<select name="conteudo_id"><option value="">—</option><% catalogo.forEach((c) => { %><option value="<%= c.id %>"><%= c.nome %></option><% }) %></select></label>
+      <label>Descrição<textarea name="descricao" rows="2"></textarea></label>
+      <label>Link (vídeo, site…)<input name="link" type="url" placeholder="https://"></label>
+      <label>Arquivos<input type="file" name="arquivos" multiple></label>
+      <button class="botao primario largo">Disponibilizar</button></form><% } %>
+  </section></aside>
+</div>
+<%- include('../partials/rodape') %>

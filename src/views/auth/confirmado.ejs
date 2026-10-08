@@ -1,0 +1,16 @@
+<%- include('_topo') %>
+<main class="central" id="conteudo">
+  <section class="cartao centro">
+    <div class="icone-grande <%= ok ? 'ok' : 'erro' %>"><%- include('../partials/icone',{nome: ok ? 'check' : 'x'}) %></div>
+    <% if (ok) { %>
+      <h1>E-mail confirmado!</h1>
+      <p>Sua conta está ativa, <%= usuario.nome %>. Agora é só entrar.</p>
+      <a class="botao primario" href="/?perfil=<%= usuario.papel %>">Ir para o login</a>
+    <% } else { %>
+      <h1>Não foi possível confirmar</h1>
+      <p><%= motivo %></p>
+      <a class="botao secundario" href="/cadastro/enviado">Solicitar novo link</a>
+    <% } %>
+  </section>
+</main>
+</body></html>

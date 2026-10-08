@@ -1,0 +1,48 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-sala') %>
+<div class="grade-lateral">
+  <div>
+    <% if (!tutorias.length) { %><p class="vazio cartao">Nenhum tutor designado ainda.</p><% } %>
+    <% tutorias.forEach((t) => { %>
+      <section class="cartao" id="t<%= t.id %>">
+        <div class="linha-acao"><div><h2><%= t.tutor_nome %></h2><p class="meta"><%= t.tutor_email %> · desde <%= f.data(t.data_inicio) %></p></div><%- include('../partials/status',{status:t.status}) %></div>
+        <ul class="lista-simples">
+          <% if (!t.tutorados.length) { %><li class="vazio">Sem tutorados.</li><% } %>
+          <% t.tutorados.forEach((a) => { %><li><span><%= a.nome %></span>
+            <% if (t.status === 'ativa') { %><form method="post" action="/professor/salas/<%= sala.id %>/desvincular"><%- include('../partials/csrf') %><input type="hidden" name="tutoria_id" value="<%= t.id %>"><input type="hidden" name="aluno_id" value="<%= a.id %>"><button class="botao link pequeno">Desvincular</button></form><% } %></li><% }) %>
+        </ul>
+        <% if (t.status === 'ativa') { const opcoes = alunos.filter((a) => !a.eh_tutor && a.tutoria_id !== t.id); %>
+        <form method="post" action="/professor/salas/<%= sala.id %>/vincular" class="form-inline">
+          <%- include('../partials/csrf') %><input type="hidden" name="tutoria_id" value="<%= t.id %>">
+          <select name="alunos" required aria-label="Aluno a vincular"><option value="">Vincular aluno…</option>
+            <% opcoes.forEach((a) => { %><option value="<%= a.id %>"><%= a.nome %><%= a.tutor_nome ? ' (hoje com ' + a.tutor_nome.split(' ')[0] + ')' : '' %></option><% }) %></select>
+          <button class="botao secundario pequeno">Vincular</button>
+        </form><% } %>
+        <a href="/professor/tutorias/<%= t.id %>">Permissões, ciclo, histórico e avaliação →</a>
+      </section>
+    <% }) %>
+  </div>
+  <aside>
+    <section class="cartao destaque"><h2>Designar tutor</h2>
+      <p class="dica">Um aluno não pode ser tutor na sala em que é tutorado (RN02), mas pode ser tutor aqui e tutorado em outra (RN03).</p>
+      <form method="post" action="/professor/salas/<%= sala.id %>/tutores" class="form">
+        <%- include('../partials/csrf') %>
+        <label>Aluno<select name="aluno_id" required><option value="">Selecione…</option>
+          <% candidatos.filter((c) => !tutorias.some((t) => t.tutor_id === c.id)).forEach((a) => { %><option value="<%= a.id %>"><%= a.nome %></option><% }) %></select></label>
+        <button class="botao primario largo">Designar como tutor</button>
+      </form>
+      <p class="dica">Pedidos de alunos que querem ser tutores ficam em <a href="/professor/pedidos">Pedidos de tutoria</a>.</p>
+    </section>
+    <section class="cartao"><h2>Sem tutor (<%= semTutor.length %>)</h2>
+      <% if (!semTutor.length) { %><p class="vazio">Todos os alunos têm tutor.</p><% } %>
+      <% if (semTutor.length && tutorias.some((t) => t.status === 'ativa')) { %>
+      <form method="post" action="/professor/salas/<%= sala.id %>/vincular" class="form">
+        <%- include('../partials/csrf') %>
+        <div class="lista-check"><% semTutor.forEach((a) => { %><label class="opcao"><input type="checkbox" name="alunos" value="<%= a.id %>"><%= a.nome %></label><% }) %></div>
+        <label>Vincular ao tutor<select name="tutoria_id" required><% tutorias.filter((t) => t.status === 'ativa').forEach((t) => { %><option value="<%= t.id %>"><%= t.tutor_nome %> (<%= t.tutorados.length %>)</option><% }) %></select></label>
+        <button class="botao primario largo">Vincular selecionados</button>
+      </form><% } %>
+    </section>
+  </aside>
+</div>
+<%- include('../partials/rodape') %>

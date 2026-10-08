@@ -1,0 +1,13 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><h1><%= titulo %></h1></div>
+<form method="post" action="<%= sala ? '/professor/salas/' + sala.id + '/editar' : '/professor/salas' %>" class="cartao form estreito">
+  <%- include('../partials/csrf') %>
+  <label>Nome da sala (Unidade Curricular)<input name="nome" required maxlength="80" placeholder="Ex.: Geografia — 1º A" value="<%= sala ? sala.nome : (form.nome || '') %>"></label>
+  <div class="grade-2">
+    <label>Ano letivo<input name="ano_letivo" type="number" min="2020" max="2100" value="<%= ano %>" <%= sala ? 'disabled' : 'required' %>></label>
+    <label>Ano do Ensino Médio<select name="serie"><% [1,2,3].forEach((s) => { %><option value="<%= s %>" <%= Number(serie) === s ? 'selected' : '' %>><%= d.SERIES[s] %></option><% }) %></select></label>
+  </div>
+  <label>Descrição (opcional)<textarea name="descricao" rows="3"><%= sala ? (sala.descricao || '') : '' %></textarea></label>
+  <div class="acoes"><a class="botao link" href="<%= sala ? '/professor/salas/' + sala.id : '/professor' %>">Cancelar</a><button class="botao primario">Salvar</button></div>
+</form>
+<%- include('../partials/rodape') %>

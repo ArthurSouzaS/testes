@@ -1,0 +1,8 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><div><h1>Histórico de tutorias</h1><p class="dica">Tutorias finalizadas de toda a rede podem ser consultadas por qualquer professor (RN18).</p></div>
+  <form method="get" class="form-inline"><label>Ano <select name="ano" data-auto-enviar><option value="">Todos</option><% anos.forEach((a) => { %><option <%= a === ano ? 'selected' : '' %>><%= a %></option><% }) %></select></label></form></div>
+<% if (!lista.length) { %><p class="vazio cartao">Nenhuma tutoria finalizada.</p><% } else { %>
+<div class="cartao rolagem"><table class="tabela"><thead><tr><th>Ano</th><th>Sala</th><th>Tutor</th><th>Professor</th><th>Tutorados</th><th>Período</th><th></th></tr></thead><tbody>
+  <% lista.forEach((t) => { %><tr><td><%= t.ano_letivo %></td><td><%= t.sala_nome %></td><td><%= t.tutor_nome %></td><td><%= t.professor_nome %></td><td><%= t.total_tutorados %></td><td><%= f.data(t.data_inicio) %> – <%= f.data(t.data_fim) %></td><td><a class="botao pequeno secundario" href="/professor/tutorias/<%= t.id %>">Consultar</a></td></tr><% }) %>
+</tbody></table></div><% } %>
+<%- include('../partials/rodape') %>

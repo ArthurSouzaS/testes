@@ -1,0 +1,11 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><h1>Notificações</h1>
+  <form method="post" action="/notificacoes/lidas"><%- include('../partials/csrf') %><button class="botao secundario">Marcar todas como lidas</button></form></div>
+<% if (!lista.length) { %><p class="vazio">Você não tem notificações.</p><% } %>
+<ul class="lista-notif">
+  <% lista.forEach((n) => { %>
+    <li class="<%= n.lida ? '' : 'nao-lida' %>"><a href="/notificacoes/<%= n.id %>/abrir">
+      <strong><%= n.titulo %></strong><% if (n.texto) { %><span><%= n.texto %></span><% } %><time><%= f.relativo(n.criado_em) %></time></a></li>
+  <% }) %>
+</ul>
+<%- include('../partials/rodape') %>

@@ -1,0 +1,9 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-tutoria') %>
+<% if (!lista.length) { %><p class="vazio cartao">Nenhuma dúvida recebida.</p><% } %>
+<% lista.forEach((q) => { %><article class="cartao"><div class="linha-acao"><h3><%= q.titulo %></h3><%- include('../partials/status',{status: q.resposta ? 'respondida' : 'pendente'}) %></div>
+  <p class="meta"><%= q.aluno_nome %><%= q.conteudo_nome ? ' · ' + q.conteudo_nome : '' %> · <%= f.relativo(q.criado_em) %></p><p class="texto"><%= q.texto %></p>
+  <% if (q.resposta) { %><div class="comentario"><strong>Sua resposta</strong><p><%= q.resposta %></p></div><% } else if (t.ativa) { %>
+  <form method="post" action="/tutor/tutorias/<%= t.id %>/duvidas/<%= q.id %>" class="form"><%- include('../partials/csrf') %><label>Resposta<textarea name="resposta" rows="3" required></textarea></label><button class="botao primario">Responder</button></form><% } %>
+</article><% }) %>
+<%- include('../partials/rodape') %>

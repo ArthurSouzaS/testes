@@ -1,0 +1,35 @@
+<%- include('../partials/topo') %>
+<div class="chat <%= atual ? 'com-conversa' : '' %>">
+  <aside class="chat-lista">
+    <h1>Mensagens</h1>
+    <p class="dica">Conversas privadas 1:1 entre tutor e tutorado.</p>
+    <% if (!conversas.length) { %><p class="vazio">Você ainda não tem conversas. Elas aparecem quando há um vínculo de tutoria.</p><% } %>
+    <ul>
+      <% conversas.forEach((c) => { const id = c.tutoria_id + '-' + c.aluno_id; %>
+        <li><a href="/mensagens/<%= id %>" class="<%= atual && (atual.t.id + '-' + atual.alunoId) === id ? 'ativo' : '' %>" data-conversa-link="<%= id %>">
+          <span class="avatar"><%= f.iniciais(c.outro_nome) %></span>
+          <span class="chat-item"><strong><%= c.outro_nome %></strong><small><%= c.papel_outro === 'tutor' ? 'Seu tutor' : 'Tutorado' %> · <%= c.sala_nome %></small><span class="ultima"><%= c.ultima || 'Sem mensagens' %></span></span>
+          <% if (c.nao_lidas) { %><span class="contador"><%= c.nao_lidas %></span><% } %></a></li>
+      <% }) %>
+    </ul>
+  </aside>
+  <section class="chat-janela">
+    <% if (!atual) { %><div class="vazio centro"><%- include('../partials/icone',{nome:'chat'}) %><p>Selecione uma conversa.</p></div><% } else { %>
+      <header class="chat-topo"><a href="/mensagens" class="botao link so-mobile">← Voltar</a><span class="avatar"><%= f.iniciais(atual.outro.nome) %></span><div><strong><%= atual.outro.nome %></strong><small><%= atual.t.sala_nome %></small></div></header>
+      <div class="chat-msgs" data-chat="<%= atual.t.id %>-<%= atual.alunoId %>" data-eu="<%= usuario.id %>">
+        <% msgs.forEach((m) => { %>
+          <div class="msg <%= m.autor_id === usuario.id ? 'minha' : '' %>"><% if (m.texto) { %><p><%= m.texto %></p><% } %><% if (m.arquivo_id) { %><a href="/arquivos/<%= m.arquivo_id %>" target="_blank" rel="noopener"><%- include('../partials/icone',{nome:'clipe'}) %><%= m.nome_original %></a><% } %><time><%= f.dataCurta(m.criado_em) %> <%= f.hora(m.criado_em) %></time></div>
+        <% }) %>
+      </div>
+      <% if (atual.t.status === 'ativa') { %>
+      <form class="chat-form" method="post" action="/mensagens/<%= atual.t.id %>-<%= atual.alunoId %>" enctype="multipart/form-data" data-chat-form>
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <label class="botao link" title="Anexar arquivo"><%- include('../partials/icone',{nome:'clipe'}) %><input type="file" name="arquivos" hidden data-anexo></label>
+        <input name="texto" placeholder="Escreva uma mensagem…" autocomplete="off" aria-label="Mensagem">
+        <button class="botao primario" aria-label="Enviar"><%- include('../partials/icone',{nome:'enviar'}) %></button>
+      </form>
+      <% } else { %><p class="dica centro">Tutoria finalizada — conversa disponível apenas para consulta.</p><% } %>
+    <% } %>
+  </section>
+</div>
+<%- include('../partials/rodape') %>

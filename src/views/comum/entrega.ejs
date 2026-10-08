@@ -1,0 +1,63 @@
+<%- include('../partials/topo') %>
+<% const comentariosDe = (qid) => comentarios.filter((c) => (c.questao_id || null) === qid);
+   const aberta = contestacoes.find((c) => c.status === 'aberta'); %>
+<div class="cabecalho">
+  <div><p class="sobretitulo"><a href="/atividades/<%= at.id %>"><%= at.titulo %></a> · <%= at.sala_nome %></p><h1><%= e.aluno_nome %></h1>
+    <p class="meta">Enviado em <%= f.dataHora(e.enviado_em) %><%= e.enviado_em > at.prazo ? ' (após o prazo)' : '' %></p></div>
+  <%- include('../partials/status',{status:e.status}) %>
+</div>
+<div class="grade-lateral">
+  <div>
+    <% if (e.texto) { %><section class="cartao"><h2>Observação do aluno</h2><p class="texto"><%= e.texto %></p></section><% } %>
+    <% if (arquivos.length) { %><section class="cartao"><h2>Arquivos enviados</h2><ul class="arquivos">
+      <% arquivos.forEach((a) => { %><li><a href="/arquivos/<%= a.id %>" target="_blank" rel="noopener"><%- include('../partials/icone',{nome:'clipe'}) %><%= a.nome_original %></a> <small><%= f.tamanhoArquivo(a.tamanho) %></small>
+        <% if (a.mime.startsWith('image/')) { %><img class="previa" src="/arquivos/<%= a.id %>" alt="Arquivo enviado: <%= a.nome_original %>" loading="lazy"><% } %></li><% }) %>
+    </ul></section><% } %>
+    <% at.questoes.forEach((q) => { const r = e.respostas[q.id] || {}; %>
+      <section class="cartao questao" id="q<%= q.id %>">
+        <h3>Questão <%= q.ordem %></h3><p><%= q.enunciado %></p>
+        <% if (q.alternativas) { %><ol type="a" class="alternativas">
+          <% q.alternativas.forEach((a, i) => { const marcada = r.alternativa === i; const certa = q.correta === i; %>
+            <li class="<%= marcada ? 'marcada' : '' %> <%= certa ? 'certa' : '' %>"><%= a %><% if (marcada) { %> <strong>← resposta do aluno</strong><% } %><% if (certa) { %> <span class="selo selo-ok">Gabarito</span><% } %></li>
+          <% }) %></ol><% } %>
+        <% if (r.texto) { %><div class="justificativa"><strong><%= q.alternativas ? 'Justificativa' : 'Resposta' %>:</strong><p><%= r.texto %></p></div><% } %>
+        <% comentariosDe(q.id).forEach((c) => { %><div class="comentario"><strong><%= c.autor_nome %></strong> <small><%= c.autor_papel === 'professor' ? 'Professor' : 'Tutor' %> · <%= f.relativo(c.criado_em) %></small><p><%= c.texto %></p></div><% }) %>
+        <% if (!somenteLeitura) { %><form method="post" action="/entregas/<%= e.id %>/comentar" class="form-inline"><%- include('../partials/csrf') %><input type="hidden" name="questao_id" value="<%= q.id %>"><input name="texto" placeholder="Comentar nesta questão…" required><button class="botao secundario pequeno">Comentar</button></form><% } %>
+      </section>
+    <% }) %>
+    <section class="cartao" id="qgeral"><h2>Comentários gerais</h2>
+      <% comentariosDe(null).forEach((c) => { %><div class="comentario"><strong><%= c.autor_nome %></strong> <small><%= f.relativo(c.criado_em) %></small><p><%= c.texto %></p></div><% }) %>
+      <% if (!comentariosDe(null).length) { %><p class="vazio">Nenhum comentário geral.</p><% } %>
+      <% if (!somenteLeitura) { %><form method="post" action="/entregas/<%= e.id %>/comentar" class="form-inline"><%- include('../partials/csrf') %><input name="texto" placeholder="Escreva um comentário…" required><button class="botao secundario pequeno">Comentar</button></form><% } %>
+    </section>
+  </div>
+  <aside>
+    <section class="cartao destaque">
+      <h2>Avaliação</h2>
+      <% if (e.status === 'corrigida') { %><p class="nota-grande"><%= f.nota(e.nota) %><small>/<%= f.nota(at.valor) %></small></p><p class="meta">Por <%= e.corretor_nome %> · <%= f.dataHora(e.corrigido_em) %></p><% if (e.feedback) { %><p class="texto"><%= e.feedback %></p><% } %><% } %>
+      <% if (!somenteLeitura && !aberta) { %>
+        <form method="post" action="/entregas/<%= e.id %>/corrigir" class="form">
+          <%- include('../partials/csrf') %>
+          <label>Nota (0 a <%= f.nota(at.valor) %>)<input name="nota" inputmode="decimal" required value="<%= e.nota ?? (e.nota_sugerida ?? '') %>"></label>
+          <% if (e.nota_sugerida !== null && e.status !== 'corrigida') { %><p class="dica">Nota sugerida pelo gabarito: <strong><%= f.nota(e.nota_sugerida) %></strong>. Ajuste conforme as justificativas.</p><% } %>
+          <label>Feedback ao aluno<textarea name="feedback" rows="4"><%= e.feedback || '' %></textarea></label>
+          <button class="botao primario largo"><%= e.status === 'corrigida' ? 'Atualizar correção' : 'Lançar nota' %></button>
+        </form>
+      <% } %>
+    </section>
+    <% if (contestacoes.length) { %><section class="cartao"><h2>Contestações</h2>
+      <% contestacoes.forEach((c) => { %><div class="contestacao"><%- include('../partials/status',{status:c.status}) %><p><strong>Aluno:</strong> <%= c.justificativa %></p><p class="meta">Nota na época: <%= f.nota(c.nota_anterior) %> · <%= f.dataHora(c.criado_em) %></p>
+        <% if (c.resposta) { %><p><strong><%= c.respondido_por_nome %>:</strong> <%= c.resposta %><%= c.nota_nova !== null ? ' — nova nota ' + f.nota(c.nota_nova) : '' %></p><% } %></div><% }) %>
+      <% if (aberta && !somenteLeitura) { %>
+        <form method="post" action="/entregas/<%= e.id %>/contestacao" class="form">
+          <%- include('../partials/csrf') %>
+          <label>Decisão<select name="decisao" data-mostrar-se="deferida" data-alvo="#nova-nota"><option value="indeferida">Manter a nota</option><option value="deferida">Aceitar e alterar a nota</option></select></label>
+          <label id="nova-nota" hidden>Nova nota<input name="nota_nova" inputmode="decimal"></label>
+          <label>Resposta ao aluno<textarea name="resposta" rows="3" required></textarea></label>
+          <button class="botao primario largo">Responder contestação</button>
+        </form>
+      <% } %>
+    </section><% } %>
+  </aside>
+</div>
+<%- include('../partials/rodape') %>

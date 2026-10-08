@@ -1,0 +1,17 @@
+<%- include('_topo') %>
+<main class="central" id="conteudo">
+  <section class="cartao centro">
+    <div class="icone-grande"><%- include('../partials/icone',{nome:'enviar'}) %></div>
+    <h1>Confirme seu e-mail</h1>
+    <% if (flash) { %><div class="alerta alerta-<%= flash.tipo %>"><span><%= flash.texto %></span></div><% } %>
+    <p>Enviamos um link de confirmação para <strong><%= email || 'seu e-mail' %></strong>. Sua conta será ativada assim que você clicar nele.</p>
+    <% if (modoDev) { %><p class="dica">Ambiente de desenvolvimento: os e-mails ficam na <a href="/dev/emails">caixa de saída de testes</a>.</p><% } %>
+    <form method="post" action="/cadastro/reenviar" class="form">
+      <%- include('../partials/csrf') %>
+      <label>Não recebeu? Reenviar para<input type="email" name="email" value="<%= email || '' %>" required></label>
+      <button class="botao secundario">Reenviar link</button>
+    </form>
+    <p><a href="/">Voltar ao login</a></p>
+  </section>
+</main>
+</body></html>

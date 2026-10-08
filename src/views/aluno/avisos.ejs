@@ -1,0 +1,11 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><h1>Avisos e comunicados</h1></div>
+<div class="grade-2">
+  <section><h2>Avisos do professor</h2>
+    <% if (!avisos.length) { %><p class="vazio cartao">Nenhum aviso.</p><% } %>
+    <% avisos.forEach((a) => { %><article class="cartao aviso"><span class="sobretitulo"><%= a.sala_nome %></span><h3><%= a.titulo %></h3><p class="texto"><%= a.texto %></p><p class="meta"><%= a.autor_nome %> · <%= f.dataHora(a.criado_em) %></p></article><% }) %></section>
+  <section><h2>Comunicados do tutor</h2>
+    <% if (!comunicados.length) { %><p class="vazio cartao">Nenhum comunicado.</p><% } %>
+    <% comunicados.forEach((c) => { %><article class="cartao aviso"><span class="sobretitulo"><%= c.sala_nome %></span><h3><%= c.titulo %></h3><p class="texto"><%= c.texto %></p><p class="meta"><%= c.autor_nome %> · <%= f.dataHora(c.criado_em) %></p></article><% }) %></section>
+</div>
+<%- include('../partials/rodape') %>

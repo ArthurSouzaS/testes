@@ -1,0 +1,21 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-sala') %>
+<div class="linha-acao"><h2>Desempenho dos tutores por trimestre</h2><a class="botao secundario" href="/professor/salas/<%= sala.id %>/exportar.xlsx"><%- include('../partials/icone',{nome:'download'}) %>Exportar notas (Excel)</a></div>
+<p class="dica">Índice do tutor (RN12) = média entre a avaliação dada pelos tutorados (rubrica) e o desempenho dos alunos que ele tutora. A nota do professor aparece à parte.</p>
+<% if (!tutorias.length) { %><p class="vazio cartao">Sem tutorias nesta sala.</p><% } %>
+<div class="cartoes">
+<% tutorias.forEach((t) => { %>
+  <section class="cartao"><div class="linha-acao"><h3><a href="/professor/tutorias/<%= t.id %>"><%= t.tutor_nome %></a></h3><%- include('../partials/nota',{valor:t.desempenho.indiceGeral}) %></div>
+    <table class="tabela compacta"><thead><tr><th>Trim.</th><th>Tutorados</th><th>Aval. alunos</th><th>Professor</th><th>Índice</th></tr></thead><tbody>
+      <% t.desempenho.etapas.forEach((e) => { %><tr><td><%= e.etapa %>º</td><td><%- include('../partials/nota',{valor:e.tutorados}) %></td><td><%- include('../partials/nota',{valor:e.alunos}) %></td><td><%- include('../partials/nota',{valor:e.professor}) %></td><td><%- include('../partials/nota',{valor:e.indice}) %></td></tr><% }) %>
+    </tbody></table>
+    <p class="meta"><%= t.desempenho.contagem.correcoes %> correções · <%= t.desempenho.contagem.registros %> encontros · <%= t.desempenho.contagem.materiais %> materiais · <%= t.desempenho.contagem.duvidas_respondidas %> dúvidas respondidas</p>
+  </section>
+<% }) %>
+</div>
+<h2>Notas dos alunos</h2>
+<div class="cartao rolagem"><table class="tabela"><thead><tr><th>Aluno</th><th>Tutor</th><th>1º tri</th><th>2º tri</th><th>3º tri</th><th>Geral</th></tr></thead><tbody>
+  <% notas.alunos.forEach((a) => { %><tr><td><a href="/professor/salas/<%= sala.id %>/alunos/<%= a.id %>"><%= a.nome %></a></td><td><%= a.tutor_nome || '—' %></td>
+    <% a.medias.forEach((m) => { %><td><%- include('../partials/nota',{valor:m}) %></td><% }) %><td><%- include('../partials/nota',{valor:a.mediaGeral}) %></td></tr><% }) %>
+</tbody></table></div>
+<%- include('../partials/rodape') %>

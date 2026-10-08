@@ -1,0 +1,42 @@
+<%- include('../partials/topo') %>
+<% const mes = new Date().getMonth() + 1; const etapaAtual = mes <= 4 ? 1 : mes <= 8 ? 2 : 3; %>
+<div class="cabecalho"><div><p class="sobretitulo"><a href="<%= voltar %>"><%= sala.nome %></a></p><h1><%= titulo %></h1></div></div>
+<% if (!tutoria) { %><div class="alerta alerta-info"><%- include('../partials/icone',{nome:'users'}) %><span>Atividades lançadas pelo professor valem para <strong>todos os alunos da sala</strong>, independentemente do tutor (RN10).</span></div><% } %>
+<form method="post" action="<%= acao %>" class="cartao form" data-construtor>
+  <%- include('../partials/csrf') %>
+  <div class="grade-2">
+    <label>Título<input name="titulo" required maxlength="120" value="<%= form.titulo || '' %>"></label>
+    <% if (!tutoria) { %>
+    <label>Tipo de atividade<select name="tipo"><% Object.entries(d.TIPOS_ATIVIDADE).forEach(([k, v]) => { %><option value="<%= k %>" <%= form.tipo === k ? 'selected' : '' %>><%= v %></option><% }) %></select></label>
+    <% } %>
+    <label>Modelo<select name="modelo" required data-modelo>
+      <% modelos.forEach((m) => { const md = d.MODELOS[m]; %><option value="<%= m %>" data-alternativas="<%= md.alternativas ? 1 : 0 %>" data-justificativa="<%= md.justificativa ? 1 : 0 %>" data-sem-questoes="<%= md.semQuestoes ? 1 : 0 %>" <%= form.modelo === m ? 'selected' : '' %>><%= md.nome %></option><% }) %>
+    </select><small class="dica" data-modelo-descricao></small></label>
+    <label>Conteúdo de Geografia<select name="conteudo_id"><option value="">—</option>
+      <% let eixo; conteudos.forEach((c) => { if (c.eixo !== eixo) { if (eixo) { %></optgroup><% } eixo = c.eixo; %><optgroup label="<%= eixo %>"><% } %><option value="<%= c.id %>" <%= String(form.conteudo_id) === String(c.id) ? 'selected' : '' %>><%= c.nome %></option><% }); if (eixo) { %></optgroup><% } %>
+    </select></label>
+    <label>Trimestre<select name="etapa"><% [1,2,3].forEach((e) => { %><option value="<%= e %>" <%= Number(form.etapa || etapaAtual) === e ? 'selected' : '' %>><%= d.ETAPAS[e] %></option><% }) %></select></label>
+    <label>Valor (pontos)<input name="valor" type="number" min="1" max="100" step="0.5" value="<%= form.valor || 10 %>"></label>
+    <label>Prazo de entrega<input name="prazo" type="datetime-local" required value="<%= form.prazo || '' %>"></label>
+  </div>
+  <label>Enunciado / orientações<textarea name="enunciado" rows="4" required><%= form.enunciado || '' %></textarea></label>
+  <fieldset class="bloco" data-questoes-bloco>
+    <legend>Questões</legend>
+    <div data-questoes></div>
+    <button type="button" class="botao secundario" data-add-questao><%- include('../partials/icone',{nome:'mais'}) %>Adicionar questão</button>
+  </fieldset>
+  <input type="hidden" name="questoes_json" value="<%= form.questoes_json || '' %>" data-questoes-json>
+  <div class="acoes"><a class="botao link" href="<%= voltar %>">Cancelar</a><button class="botao primario">Publicar atividade</button></div>
+</form>
+<template id="tpl-questao">
+  <div class="questao-edit">
+    <div class="questao-topo"><strong data-num></strong><button type="button" class="botao link perigo" data-remover>Remover</button></div>
+    <label>Enunciado<textarea rows="2" data-enunciado></textarea></label>
+    <div data-alts>
+      <p class="dica">Alternativas — marque a correta (opcional) para gerar uma nota sugerida.</p>
+      <div data-lista-alts></div>
+      <button type="button" class="botao link" data-add-alt>+ alternativa</button>
+    </div>
+  </div>
+</template>
+<%- include('../partials/rodape') %>

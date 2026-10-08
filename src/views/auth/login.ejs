@@ -1,0 +1,37 @@
+<%- include('_topo') %>
+<main class="login" id="conteudo">
+  <section class="login-intro">
+    <p class="sobretitulo claro">Rede SESI · Geografia</p>
+    <h1>Tutoria entre pares, acompanhada de perto.</h1>
+    <p>O Protutal organiza a tutoria entre alunos: o tutorado acompanha sua evolução, o tutor registra e orienta, e o professor supervisiona tudo com dados reais.</p>
+    <ul class="login-lista">
+      <li><%- include('../partials/icone',{nome:'grafico'}) %>Notas por trimestre e conteúdos dominados</li>
+      <li><%- include('../partials/icone',{nome:'chat'}) %>Chat 1:1 privado entre tutor e tutorado</li>
+      <li><%- include('../partials/icone',{nome:'escudo'}) %>Rubricas e validação do professor</li>
+    </ul>
+  </section>
+  <section class="cartao login-cartao" aria-labelledby="titulo-login">
+    <h2 id="titulo-login">Entrar</h2>
+    <div class="segmento" role="tablist" aria-label="Perfil de acesso">
+      <a role="tab" href="/?perfil=aluno" class="<%= perfil === 'aluno' ? 'ativo' : '' %>" aria-selected="<%= perfil === 'aluno' %>" data-perfil="aluno"><%- include('../partials/icone',{nome:'perfil'}) %>Aluno</a>
+      <a role="tab" href="/?perfil=professor" class="<%= perfil === 'professor' ? 'ativo' : '' %>" aria-selected="<%= perfil === 'professor' %>" data-perfil="professor"><%- include('../partials/icone',{nome:'livro'}) %>Professor</a>
+    </div>
+    <p class="dica" data-dica-perfil><%= perfil === 'aluno' ? 'Tutores também entram por aqui, com a conta de aluno.' : 'Acesso para docentes com e-mail institucional do SESI.' %></p>
+    <% if (typeof erro !== 'undefined' && erro) { %>
+      <div class="alerta alerta-erro" role="alert"><%- include('../partials/icone',{nome:'x'}) %><span><%= erro %></span></div>
+      <% if (typeof naoConfirmado !== 'undefined' && naoConfirmado) { %>
+        <form method="post" action="/cadastro/reenviar" class="linha-acao"><%- include('../partials/csrf') %><input type="hidden" name="email" value="<%= email %>"><button class="botao link">Reenviar e-mail de confirmação</button></form>
+      <% } %>
+    <% } %>
+    <% if (flash) { %><div class="alerta alerta-<%= flash.tipo %>"><span><%= flash.texto %></span></div><% } %>
+    <form method="post" action="/login" class="form">
+      <%- include('../partials/csrf') %>
+      <input type="hidden" name="perfil" value="<%= perfil %>" data-campo-perfil>
+      <label>E-mail institucional<input type="email" name="email" required autocomplete="username" value="<%= typeof email !== 'undefined' ? email : '' %>"></label>
+      <label>Senha<input type="password" name="senha" required autocomplete="current-password"></label>
+      <button class="botao primario largo">Entrar</button>
+    </form>
+    <p class="centro">Ainda não tem conta? <a href="/cadastro?perfil=<%= perfil %>" data-link-cadastro>Cadastre-se</a></p>
+  </section>
+</main>
+</body></html>

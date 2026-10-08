@@ -1,0 +1,27 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-tutoria') %>
+<div class="kpis">
+  <div class="kpi"><span>Tutorados</span><strong><%= t.tutorados.length %></strong></div>
+  <div class="kpi"><span>Entregas a corrigir</span><strong><%= pendencias.entregas.length %></strong></div>
+  <div class="kpi"><span>Contestações</span><strong><%= pendencias.contestacoes.length %></strong></div>
+  <div class="kpi"><span>Meu índice</span><%- include('../partials/nota',{valor:desempenho.indiceGeral}) %></div>
+</div>
+<div class="grade-2">
+  <section class="cartao"><h2>Meus tutorados</h2>
+    <% if (!t.tutorados.length) { %><p class="vazio">O professor ainda não vinculou tutorados a você.</p><% } %>
+    <ul class="lista-simples"><% t.tutorados.forEach((a) => { %><li><a href="/tutor/tutorias/<%= t.id %>/tutorados/<%= a.id %>"><%= a.nome %></a>
+      <span class="linha-acao"><% if (a.pendentes) { %><span class="selo selo-aviso"><%= a.pendentes %> a corrigir</span><% } %><%- include('../partials/nota',{valor:a.mediaGeral}) %><a class="botao link pequeno" href="/mensagens/<%= t.id %>-<%= a.id %>" aria-label="Conversar com <%= a.nome %>"><%- include('../partials/icone',{nome:'chat'}) %></a></span></li><% }) %></ul>
+  </section>
+  <section class="cartao"><h2>Direcionamento do professor</h2>
+    <p><strong>Metas:</strong> <%= t.metas || 'Ainda não definidas.' %></p>
+    <p><strong>Objetivos:</strong> <%= t.objetivos || 'Ainda não definidos.' %></p>
+    <% if (t.metas_especificas) { %><p><strong>Metas desta tutoria:</strong> <%= t.metas_especificas %></p><% } %>
+    <p><strong>Conteúdos:</strong> <%= conteudos.map((c) => c.nome).join(', ') || '—' %></p>
+    <h3>Critérios da rubrica</h3><ul class="itens"><% criterios.forEach((c) => { %><li><%= c.nome %> (até <%= c.pontuacao_max %>)<%= c.descricao ? ' — ' + c.descricao : '' %></li><% }) %></ul>
+    <p class="meta"><%= t.pode_criar_atividades ? 'Você pode criar atividades: ' + t.modelos.map((m) => d.MODELOS[m].nome).join(', ') : 'Criação de atividades não liberada pelo professor.' %></p>
+  </section>
+</div>
+<% if (pendencias.total) { %><section class="cartao"><h2>Pendências</h2><ul class="lista-simples">
+  <% pendencias.entregas.forEach((p) => { %><li><a href="/entregas/<%= p.id %>"><%= p.titulo %> — <%= p.aluno_nome %></a><span class="selo selo-aviso">Corrigir</span></li><% }) %>
+  <% pendencias.contestacoes.forEach((p) => { %><li><a href="/entregas/<%= p.entrega_id %>"><%= p.titulo %> — <%= p.aluno_nome %></a><span class="selo selo-perigo">Contestação</span></li><% }) %></ul></section><% } %>
+<%- include('../partials/rodape') %>

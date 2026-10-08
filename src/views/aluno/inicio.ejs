@@ -1,0 +1,33 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><div><p class="sobretitulo">Olá, <%= usuario.nome.split(' ')[0] %></p><h1><%= titulo %></h1></div>
+  <% if (minhas.length > 1) { %><form method="get" class="form-inline"><label>Sala <select name="sala" data-auto-enviar><% minhas.forEach((s) => { %><option value="<%= s.id %>" <%= sala && s.id === sala.id ? 'selected' : '' %>><%= s.nome %> (<%= s.ano_letivo %>)</option><% }) %></select></label></form><% } %></div>
+<% if (pedido) { %><div class="alerta alerta-info"><%- include('../partials/icone',{nome:'relogio'}) %><span>Seu pedido para ser tutor(a) está <strong>pendente</strong> de análise do professor.</span></div><% } %>
+<% if (!sala) { %>
+  <div class="cartao centro vazio"><%- include('../partials/icone',{nome:'sala'}) %><p>Você ainda não foi incluído em nenhuma sala. Assim que o professor incluir você, seu painel aparecerá aqui.</p></div>
+<% } else { %>
+  <div class="cartao faixa">
+    <div><span class="sobretitulo"><%= sala.nome %> · <%= sala.ano_letivo %></span><p>Professor(a): <strong><%= sala.professor_nome %></strong> · Tutor(a): <strong><%= sala.tutor_nome || 'ainda não definido' %></strong></p></div>
+    <% if (sala.tutoria_id) { %><a class="botao primario" href="/mensagens/<%= sala.tutoria_id %>-<%= usuario.id %>"><%- include('../partials/icone',{nome:'chat'}) %>Falar com meu tutor</a><% } %>
+  </div>
+  <% if (sala.tutoria_status === 'finalizada') { %><div class="alerta alerta-info"><span>Sua tutoria nesta sala foi finalizada — você pode consultar o desempenho e o histórico (RN14).</span></div><% } %>
+  <div class="grade-2">
+    <%- include('../partials/desempenho-aluno') %>
+    <section class="cartao"><h2>Conteúdos de Geografia</h2>
+      <% const dom = desempenho.conteudos.filter((c) => c.situacao === 'dominado'), tre = desempenho.conteudos.filter((c) => c.situacao === 'treinar'); %>
+      <% if (!desempenho.conteudos.length) { %><p class="vazio">Quando suas atividades forem corrigidas, os conteúdos aparecerão aqui.</p><% } %>
+      <% if (dom.length) { %><h3><%- include('../partials/icone',{nome:'check'}) %>Já domino</h3><div class="selos"><% dom.forEach((c) => { %><span class="selo selo-ok"><%= c.nome %></span><% }) %></div><% } %>
+      <% if (tre.length) { %><h3><%- include('../partials/icone',{nome:'relogio'}) %>Preciso treinar</h3><div class="selos"><% tre.forEach((c) => { %><span class="selo selo-aviso"><%= c.nome %></span><% }) %></div><% } %>
+    </section>
+  </div>
+  <div class="grade-2">
+    <section class="cartao"><h2>Próximos prazos</h2>
+      <% if (!proximas.length) { %><p class="vazio">Nada pendente. Bom trabalho!</p><% } %>
+      <ul class="lista-simples"><% proximas.forEach((a) => { %><li><a href="/atividades/<%= a.id %>"><%= a.titulo %></a><span class="selo selo-aviso"><%- include('../partials/icone',{nome:'relogio'}) %><%= f.relativo(a.prazo) %></span></li><% }) %></ul>
+      <a href="/aluno/atividades">Todas as atividades →</a></section>
+    <section class="cartao"><h2>Notas recentes</h2>
+      <% if (!desempenho.notas.length) { %><p class="vazio">Nenhuma atividade corrigida ainda.</p><% } %>
+      <ul class="lista-simples"><% desempenho.notas.slice(0, 5).forEach((n) => { %><li><a href="/atividades/<%= n.atividade_id %>"><%= n.titulo %></a><%- include('../partials/nota',{valor:n.nota10}) %></li><% }) %></ul></section>
+  </div>
+  <% if (avisos.length) { %><section class="cartao"><h2>Avisos da sala</h2><% avisos.forEach((a) => { %><article class="aviso"><strong><%= a.titulo %></strong> <small class="meta"><%= f.relativo(a.criado_em) %></small><p><%= a.texto %></p></article><% }) %><a href="/aluno/avisos">Ver todos →</a></section><% } %>
+<% } %>
+<%- include('../partials/rodape') %>

@@ -1,0 +1,27 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-sala') %>
+<div class="kpis">
+  <div class="kpi"><span>Alunos</span><strong><%= alunos.length %></strong></div>
+  <div class="kpi"><span>Tutorias</span><strong><%= tutorias.length %></strong></div>
+  <div class="kpi"><span>Sem tutor</span><strong><%= alunos.filter((a) => !a.tutoria_id && !a.eh_tutor).length %></strong></div>
+  <div class="kpi"><span>Critérios da rubrica</span><strong><%= criterios.length %></strong></div>
+</div>
+<% if (!criterios.length || !sala.metas) { %><div class="alerta alerta-info"><%- include('../partials/icone',{nome:'escudo'}) %><span>Defina <a href="/professor/salas/<%= sala.id %>/metas">metas, objetivos e critérios da rubrica</a> para orientar os tutores.</span></div><% } %>
+<section class="cartao">
+  <div class="linha-acao"><h2>Tutorias</h2>
+    <% if (tutorias.some((t) => t.status === 'ativa')) { %><form method="post" action="/professor/salas/<%= sala.id %>/finalizar" data-confirmar="Finalizar todas as tutorias ativas desta sala? Tutores e alunos passarão a apenas consultar o histórico."><%- include('../partials/csrf') %><button class="botao link perigo">Finalizar todas (fim do ano)</button></form><% } %></div>
+  <% if (!tutorias.length) { %><p class="vazio">Nenhum tutor designado. <a href="/professor/salas/<%= sala.id %>/tutorias">Designar tutores</a></p><% } else { %>
+  <div class="rolagem"><table class="tabela"><thead><tr><th>Tutor</th><th>Tutorados</th><th>Status</th><th>Índice (RN12)</th><th></th></tr></thead><tbody>
+    <% tutorias.forEach((t) => { %><tr><td><%= t.tutor_nome %></td><td><%= t.tutorados.map((a) => a.nome.split(' ')[0]).join(', ') || '—' %></td><td><%- include('../partials/status',{status:t.status}) %></td><td><%- include('../partials/nota',{valor:t.desempenho.indiceGeral}) %></td><td><a class="botao pequeno secundario" href="/professor/tutorias/<%= t.id %>">Abrir</a></td></tr><% }) %>
+  </tbody></table></div><% } %>
+</section>
+<div class="grade-2">
+  <section class="cartao"><h2>Alunos</h2>
+    <ul class="lista-simples"><% alunos.slice(0, 12).forEach((a) => { %><li><a href="/professor/salas/<%= sala.id %>/alunos/<%= a.id %>"><%= a.nome %></a><small class="meta"><%= a.eh_tutor ? 'Tutor(a)' : a.tutor_nome ? 'Tutor: ' + a.tutor_nome : 'Sem tutor' %></small></li><% }) %></ul>
+    <a href="/professor/salas/<%= sala.id %>/alunos">Gerenciar alunos →</a></section>
+  <section class="cartao"><h2>Atividades recentes</h2>
+    <% if (!atividades.length) { %><p class="vazio">Nenhuma atividade.</p><% } %>
+    <ul class="lista-simples"><% atividades.forEach((a) => { %><li><a href="/atividades/<%= a.id %>"><%= a.titulo %></a><small class="meta"><%= a.entregues %>/<%= a.total_destino %> entregas · <%= a.a_corrigir %> a corrigir</small></li><% }) %></ul>
+    <a href="/professor/salas/<%= sala.id %>/atividades">Todas as atividades →</a></section>
+</div>
+<%- include('../partials/rodape') %>

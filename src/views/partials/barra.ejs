@@ -1,0 +1,2 @@
+<% const v = (valor === null || valor === undefined) ? null : Number(valor); %>
+<div class="barra-linha"><span class="barra-rotulo"><%= rotulo %></span><span class="barra" aria-hidden="true"><span class="barra-fill <%= v === null ? '' : v >= 7 ? 'boa' : v >= 5 ? 'media' : 'baixa' %>" style="width:<%= v === null ? 0 : Math.min(100, v * 10) %>%"></span></span><%- include('nota', {valor: v}) %></div>

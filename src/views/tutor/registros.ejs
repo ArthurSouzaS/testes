@@ -1,0 +1,23 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-tutoria') %>
+<div class="grade-lateral">
+  <div>
+    <% if (!lista.length) { %><p class="vazio cartao">Nenhum encontro registrado.</p><% } %>
+    <% lista.forEach((r) => { %><article class="cartao"><div class="linha-acao"><strong><%= f.data(r.data_encontro) %> · <%= r.conteudo_nome || 'Geral' %></strong><%- include('../partials/status',{status:r.validacao_status}) %></div>
+      <p><strong>Assuntos:</strong> <%= r.assuntos %></p><% if (r.estrategias) { %><p><strong>Estratégias e métodos:</strong> <%= r.estrategias %></p><% } %><% if (r.consideracoes) { %><p><strong>Considerações:</strong> <%= r.consideracoes %></p><% } %>
+      <% r.arquivos.forEach((a) => { %><a class="anexo" href="/arquivos/<%= a.id %>" target="_blank" rel="noopener"><%- include('../partials/icone',{nome:'clipe'}) %><%= a.nome_original %></a><% }) %>
+      <% if (r.validacao_comentario) { %><p class="meta">Professor: <%= r.validacao_comentario %></p><% } %></article><% }) %>
+  </div>
+  <aside><section class="cartao destaque"><h2>Registrar encontro</h2>
+    <% if (!t.ativa) { %><p class="vazio">Tutoria finalizada.</p><% } else { %>
+    <form method="post" action="/tutor/tutorias/<%= t.id %>/registros" class="form" enctype="multipart/form-data"><input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Data do encontro<input type="date" name="data_encontro" value="<%= f.hoje() %>" required></label>
+      <label>Conteúdo<select name="conteudo_id"><option value="">—</option><% catalogo.forEach((c) => { %><option value="<%= c.id %>"><%= c.nome %></option><% }) %></select></label>
+      <label>Assuntos trabalhados<textarea name="assuntos" rows="3" required></textarea></label>
+      <label>Estratégias e métodos usados<textarea name="estrategias" rows="2"></textarea></label>
+      <label>Considerações (dificuldades, avanços)<textarea name="consideracoes" rows="2"></textarea></label>
+      <label>Anexos (ex.: foto do caderno)<input type="file" name="arquivos" multiple accept="image/*,.pdf,.doc,.docx"></label>
+      <button class="botao primario largo">Salvar registro</button></form><% } %>
+  </section></aside>
+</div>
+<%- include('../partials/rodape') %>

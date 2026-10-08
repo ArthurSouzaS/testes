@@ -1,0 +1,23 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><h1>Dúvidas e materiais de apoio</h1></div>
+<% if (!tutorias.length) { %><p class="vazio cartao">Você ainda não tem tutor. Quando o professor vincular você a um tutor, este espaço será liberado.</p><% } %>
+<% tutorias.forEach((s) => { %>
+<h2><%= s.nome %> · tutor(a) <%= s.tutor_nome %></h2>
+<div class="grade-2">
+  <section class="cartao"><h3>Minhas dúvidas</h3>
+    <% if (s.tutoria_status === 'ativa') { %><form method="post" action="/aluno/duvidas" class="form"><%- include('../partials/csrf') %><input type="hidden" name="tutoria_id" value="<%= s.tutoria_id %>">
+      <div class="grade-2"><label>Assunto<input name="titulo" required maxlength="120"></label><label>Conteúdo<select name="conteudo_id"><option value="">—</option><% catalogo.forEach((c) => { %><option value="<%= c.id %>"><%= c.nome %></option><% }) %></select></label></div>
+      <label>Descreva sua dúvida<textarea name="texto" rows="3" required></textarea></label><button class="botao primario">Enviar ao tutor</button></form><% } %>
+    <% s.duvidas.forEach((q) => { %><article class="registro"><div class="linha-acao"><strong><%= q.titulo %></strong><%- include('../partials/status',{status: q.resposta ? 'respondida' : 'pendente'}) %></div><p><%= q.texto %></p>
+      <% if (q.resposta) { %><div class="comentario"><strong><%= s.tutor_nome %></strong><p><%= q.resposta %></p></div><% } %></article><% }) %>
+    <p class="dica">Prefere conversar? <a href="/mensagens/<%= s.tutoria_id %>-<%= usuario.id %>">Abra o chat com seu tutor</a>.</p>
+  </section>
+  <section class="cartao"><h3>Materiais de apoio</h3>
+    <% if (!s.materiais.length) { %><p class="vazio">Nenhum material ainda.</p><% } %>
+    <% s.materiais.forEach((m) => { %><article class="registro"><strong><%= m.titulo %></strong> <small class="meta"><%= m.conteudo_nome || '' %> · <%= f.data(m.criado_em) %></small><% if (m.descricao) { %><p><%= m.descricao %></p><% } %>
+      <% if (m.link) { %><a class="anexo" href="<%= m.link %>" target="_blank" rel="noopener noreferrer"><%- include('../partials/icone',{nome:'globo'}) %>Abrir link</a><% } %>
+      <% m.arquivos.forEach((a) => { %><a class="anexo" href="/arquivos/<%= a.id %>" target="_blank" rel="noopener"><%- include('../partials/icone',{nome:'clipe'}) %><%= a.nome_original %></a><% }) %></article><% }) %>
+  </section>
+</div>
+<% }) %>
+<%- include('../partials/rodape') %>

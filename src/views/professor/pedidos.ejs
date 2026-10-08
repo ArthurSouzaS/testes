@@ -1,0 +1,19 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><h1>Pedidos de tutoria</h1></div>
+<p class="dica">Ao aceitar, escolha a sala (UC) em que o aluno será tutor. Ao recusar, ele continua apenas como aluno (RN21).</p>
+<% if (!pendentes.length) { %><p class="vazio cartao">Nenhum pedido pendente.</p><% } %>
+<div class="cartoes">
+<% pendentes.forEach((p) => { %>
+  <section class="cartao"><h2><%= p.aluno_nome %></h2><p class="meta"><%= p.aluno_email %> · pedido em <%= f.data(p.criado_em) %></p>
+    <% if (p.mensagem) { %><blockquote><%= p.mensagem %></blockquote><% } %><% if (p.salas_aluno) { %><p class="meta">Matriculado em: <%= p.salas_aluno %></p><% } %>
+    <form method="post" action="/professor/pedidos/<%= p.id %>/aceitar" class="form-inline"><%- include('../partials/csrf') %>
+      <select name="sala_id" required aria-label="Sala"><option value="">Tutor em qual sala?</option><% salas.forEach((s) => { %><option value="<%= s.id %>"><%= s.nome %> (<%= s.ano_letivo %>)</option><% }) %></select>
+      <button class="botao primario pequeno"><%- include('../partials/icone',{nome:'check'}) %>Aceitar</button></form>
+    <form method="post" action="/professor/pedidos/<%= p.id %>/recusar" class="form-inline"><%- include('../partials/csrf') %>
+      <input name="resposta" placeholder="Motivo (opcional)" aria-label="Motivo da recusa"><button class="botao link perigo pequeno">Recusar</button></form>
+  </section>
+<% }) %>
+</div>
+<% if (decididos.length) { %><h2>Decididos recentemente</h2><div class="cartao"><ul class="lista-simples">
+  <% decididos.forEach((p) => { %><li><span><%= p.aluno_nome %><%= p.sala_nome ? ' → ' + p.sala_nome : '' %> <small class="meta"><%= f.data(p.decidido_em) %></small></span><%- include('../partials/status',{status:p.status}) %></li><% }) %></ul></div><% } %>
+<%- include('../partials/rodape') %>

@@ -1,0 +1,101 @@
+<%- include('../partials/topo') %>
+<% const pode = !leitura; const valida = (tabela, x) => ({ tabela, x }); %>
+<div class="cabecalho">
+  <div><p class="sobretitulo"><% if (rel === 'professor') { %><a href="/professor/salas/<%= t.sala_id %>/tutorias"><%= t.sala_nome %> · <%= t.ano_letivo %></a><% } else { %><a href="/professor/historico">Histórico</a> · <%= t.sala_nome %><% } %></p>
+    <h1>Tutoria de <%= t.tutor_nome %></h1><p class="meta"><%= f.plural(tutorados.length, 'tutorado', 'tutorados') %> · início <%= f.data(t.data_inicio) %><%= t.data_fim ? ' · fim ' + f.data(t.data_fim) : '' %></p></div>
+  <%- include('../partials/status',{status:t.status}) %>
+</div>
+<% if (rel === 'professor_leitura') { %><div class="alerta alerta-info"><span>Consulta de tutoria finalizada de outro professor (RN18) — somente leitura.</span></div><% } %>
+<nav class="abas ancoras"><a href="#ciclo">Ciclo</a><a href="#desempenho">Desempenho</a><a href="#registros">Registros</a><a href="#rubricas">Rubricas</a><a href="#tutorados">Tutorados</a><a href="#producao">Atividades e materiais</a><a href="#historico">Histórico</a></nav>
+
+<div class="grade-2">
+  <section class="cartao" id="ciclo"><h2>Ciclo da tutoria</h2>
+    <% if (pode) { %>
+    <form method="post" action="/professor/tutorias/<%= t.id %>/ciclo" class="form"><%- include('../partials/csrf') %><input type="hidden" name="ancora" value="ciclo">
+      <label>Data de início<input type="date" name="data_inicio" value="<%= t.data_inicio %>" required></label>
+      <label>Conteúdos de Geografia trabalhados<select name="conteudos" multiple size="6">
+        <% catalogo.forEach((c) => { %><option value="<%= c.id %>" <%= conteudos.some((x) => x.id === c.id) ? 'selected' : '' %>><%= c.eixo %> — <%= c.nome %></option><% }) %></select><small class="dica">Ctrl/⌘ + clique para selecionar vários.</small></label>
+      <label>Metas específicas desta tutoria<textarea name="metas_especificas" rows="2"><%= t.metas_especificas || '' %></textarea></label>
+      <button class="botao secundario">Salvar</button></form>
+    <% } else { %>
+      <p><strong>Conteúdos:</strong> <%= conteudos.map((c) => c.nome).join(', ') || '—' %></p><% if (t.metas_especificas) { %><p><strong>Metas específicas:</strong> <%= t.metas_especificas %></p><% } %>
+    <% } %>
+    <% if (rel === 'professor') { %>
+      <hr>
+      <% if (t.status === 'ativa') { %>
+        <% if (pendencias.total) { %><div class="alerta alerta-aviso"><span>Finalização bloqueada (RN15): <%= pendencias.entregas.length %> atividade(s) sem correção e <%= pendencias.contestacoes.length %> contestação(ões) em aberto.</span></div>
+          <ul class="lista-simples"><% pendencias.entregas.forEach((p) => { %><li><a href="/entregas/<%= p.id %>"><%= p.titulo %> — <%= p.aluno_nome %></a><span class="selo selo-aviso">Sem correção</span></li><% }) %>
+            <% pendencias.contestacoes.forEach((p) => { %><li><a href="/entregas/<%= p.entrega_id %>"><%= p.titulo %> — <%= p.aluno_nome %></a><span class="selo selo-perigo">Contestação</span></li><% }) %></ul>
+        <% } else { %>
+          <form method="post" action="/professor/tutorias/<%= t.id %>/finalizar" data-confirmar="Finalizar a tutoria? Tutor e alunos passarão a apenas consultar o histórico."><%- include('../partials/csrf') %><button class="botao perigo">Finalizar tutoria</button></form>
+        <% } %>
+      <% } else if (t.ano_letivo === anoAtual) { %>
+        <form method="post" action="/professor/tutorias/<%= t.id %>/reabrir"><%- include('../partials/csrf') %><button class="botao secundario">Reabrir tutoria</button></form><p class="dica">Reabertura permitida apenas dentro do ano letivo <%= t.ano_letivo %> (RN17).</p>
+      <% } else { %><p class="dica">Tutoria de <%= t.ano_letivo %>: não pode mais ser reaberta (RN17).</p><% } %>
+    <% } %>
+  </section>
+
+  <section class="cartao"><h2>Permissões do tutor</h2>
+    <% if (pode) { %>
+    <form method="post" action="/professor/tutorias/<%= t.id %>/permissoes" class="form"><%- include('../partials/csrf') %><input type="hidden" name="ancora" value="ciclo">
+      <label class="opcao"><input type="checkbox" name="pode_criar_atividades" value="1" <%= t.pode_criar_atividades ? 'checked' : '' %> data-mostrar="#modelos"> Pode criar atividades para seus tutorados (RN08)</label>
+      <fieldset id="modelos" class="bloco" <%= t.pode_criar_atividades ? '' : 'hidden' %>><legend>Modelos autorizados (RN09)</legend>
+        <% Object.entries(d.MODELOS).forEach(([k, m]) => { %><label class="opcao"><input type="checkbox" name="modelos" value="<%= k %>" <%= t.modelos.includes(k) ? 'checked' : '' %>><span><%= m.nome %><small class="meta"><%= m.descricao %></small></span></label><% }) %></fieldset>
+      <button class="botao secundario">Salvar permissões</button></form>
+    <% } else { %><p><%= t.pode_criar_atividades ? 'Pode criar atividades: ' + t.modelos.map((m) => d.MODELOS[m].nome).join(', ') : 'Não pode criar atividades.' %></p><% } %>
+    <% if (pode) { %><hr><h3>Revogar status de tutor</h3>
+      <p class="dica">A tutoria e todo o histórico passam ao novo tutor (RN04).</p>
+      <form method="post" action="/professor/tutorias/<%= t.id %>/revogar" class="form" data-confirmar="Revogar <%= t.tutor_nome %> e transferir a tutoria?"><%- include('../partials/csrf') %>
+        <label>Novo tutor<select name="novo_tutor_id" required><option value="">Selecione…</option><% candidatos.forEach((a) => { %><option value="<%= a.id %>"><%= a.nome %></option><% }) %></select></label>
+        <label>Motivo<input name="motivo" maxlength="200"></label><button class="botao perigo">Revogar e transferir</button></form><% } %>
+  </section>
+</div>
+
+<section class="cartao" id="desempenho"><div class="linha-acao"><h2>Desempenho do tutor</h2><%- include('../partials/nota',{valor:desempenho.indiceGeral}) %></div>
+  <div class="grade-2"><div>
+    <table class="tabela compacta"><thead><tr><th>Trimestre</th><th>Tutorados</th><th>Avaliação dos alunos</th><th>Professor</th><th>Índice</th></tr></thead><tbody>
+      <% desempenho.etapas.forEach((e) => { %><tr><td><%= d.ETAPAS[e.etapa] %></td><td><%- include('../partials/nota',{valor:e.tutorados}) %></td><td><%- include('../partials/nota',{valor:e.alunos}) %></td><td><%- include('../partials/nota',{valor:e.professor}) %></td><td><%- include('../partials/nota',{valor:e.indice}) %></td></tr><% }) %></tbody></table>
+    <p class="meta"><%= desempenho.contagem.correcoes %> correções · <%= desempenho.contagem.atividades %> atividades criadas · <%= desempenho.contagem.registros %> encontros · <%= desempenho.contagem.duvidas_respondidas %> dúvidas respondidas</p>
+    <% if (avaliacoes.length) { %><h3>Avaliações recebidas</h3><ul class="linha-tempo"><% avaliacoes.forEach((a) => { %><li><strong><%= a.avaliador_papel === 'professor' ? 'Professor' : 'Tutorado(a)' %></strong> · <%= a.etapa %>º tri · <%- include('../partials/nota',{valor:a.nota}) %><%= a.comentario ? ' — ' + a.comentario : '' %></li><% }) %></ul><% } %>
+  </div>
+  <% if (pode) { %><form method="post" action="/professor/tutorias/<%= t.id %>/avaliar" class="form bloco"><%- include('../partials/csrf') %><input type="hidden" name="ancora" value="desempenho">
+    <h3>Avaliar o tutor (RF19)</h3>
+    <div class="grade-2"><label>Trimestre<select name="etapa"><% [1,2,3].forEach((e) => { %><option value="<%= e %>"><%= d.ETAPAS[e] %></option><% }) %></select></label><label>Nota (0–10)<input name="nota" inputmode="decimal" required></label></div>
+    <label>Comentário / feedback<textarea name="comentario" rows="3"></textarea></label><button class="botao primario">Registrar avaliação</button></form><% } %>
+  </div>
+</section>
+
+<section class="cartao" id="registros"><h2>Registros de encontros do tutor</h2><p class="dica">Assuntos, estratégias e considerações — valide ou peça ajuste (RU11).</p>
+  <% if (!registros.length) { %><p class="vazio">Nenhum registro.</p><% } %>
+  <% registros.forEach((r) => { %><article class="registro"><div class="linha-acao"><strong><%= f.data(r.data_encontro) %> · <%= r.conteudo_nome || 'Geral' %></strong><%- include('../partials/status',{status:r.validacao_status}) %></div>
+    <p><strong>Assuntos:</strong> <%= r.assuntos %></p><% if (r.estrategias) { %><p><strong>Estratégias:</strong> <%= r.estrategias %></p><% } %><% if (r.consideracoes) { %><p><strong>Considerações:</strong> <%= r.consideracoes %></p><% } %>
+    <% (arquivosRegistro[r.id] || []).forEach((a) => { %><a class="anexo" href="/arquivos/<%= a.id %>" target="_blank" rel="noopener"><%- include('../partials/icone',{nome:'clipe'}) %><%= a.nome_original %></a><% }) %>
+    <% if (r.validacao_comentario) { %><p class="meta">Professor: <%= r.validacao_comentario %></p><% } %>
+    <% if (pode) { %><%- include('_validar', valida('registros', r)) %><% } %></article><% }) %>
+</section>
+
+<section class="cartao" id="rubricas"><h2>Rubricas preenchidas pelo tutor</h2>
+  <% if (!rubricas.length) { %><p class="vazio">Nenhuma rubrica preenchida.</p><% } %>
+  <% rubricas.forEach((r) => { %><article class="registro"><div class="linha-acao"><strong><%= r.aluno_nome %> · <%= d.ETAPAS[r.etapa] %></strong><span class="linha-acao"><%- include('../partials/nota',{valor:r.nota}) %><%- include('../partials/status',{status:r.validacao_status}) %></span></div>
+    <ul class="itens"><% r.itens.forEach((i) => { %><li><%= i.criterio_nome %>: <%= f.nota(i.pontos) %>/<%= i.pontuacao_max %></li><% }) %></ul><% if (r.comentario) { %><p class="texto"><%= r.comentario %></p><% } %>
+    <% if (pode) { %><%- include('_validar', valida('rubricas', r)) %><% } %></article><% }) %>
+</section>
+
+<div class="grade-2">
+  <section class="cartao" id="tutorados"><h2>Tutorados</h2>
+    <ul class="lista-simples"><% tutorados.forEach((a) => { %><li><a href="/professor/salas/<%= t.sala_id %>/alunos/<%= a.id %>"><%= a.nome %></a><small class="meta">desde <%= f.data(a.vinculado_em) %></small></li><% }) %></ul>
+    <h3>Observações registradas</h3>
+    <% if (!observacoes.length) { %><p class="vazio">Registre observações na página de cada aluno.</p><% } %>
+    <ul class="linha-tempo"><% observacoes.slice(0, 8).forEach((o) => { %><li><strong><%= o.aluno_nome %></strong> · <%= d.TIPOS_OBSERVACAO[o.tipo] %>: <%= o.texto %></li><% }) %></ul>
+  </section>
+  <section class="cartao" id="producao"><h2>Atividades e materiais do tutor</h2>
+    <h3>Atividades criadas</h3><% if (!atividades.length) { %><p class="vazio">Nenhuma.</p><% } %>
+    <ul class="lista-simples"><% atividades.forEach((a) => { %><li><a href="/atividades/<%= a.id %>"><%= a.titulo %></a><small class="meta"><%= a.entregues %> entregas · <%= a.a_corrigir %> a corrigir</small></li><% }) %></ul>
+    <h3>Materiais enviados</h3><% if (!materiais.length) { %><p class="vazio">Nenhum.</p><% } %>
+    <ul class="lista-simples"><% materiais.forEach((m) => { %><li><span><%= m.titulo %> <% m.arquivos.forEach((a) => { %><a href="/arquivos/<%= a.id %>"><%- include('../partials/icone',{nome:'clipe'}) %></a><% }) %><% if (m.link) { %><a href="<%= m.link %>" target="_blank" rel="noopener noreferrer">link</a><% } %></span><small class="meta"><%= f.data(m.criado_em) %></small></li><% }) %></ul>
+  </section>
+</div>
+<section class="cartao" id="historico"><h2>Histórico de tutores (RN04)</h2>
+  <ul class="linha-tempo"><% historico.forEach((h) => { %><li><strong><%= h.tutor_nome %></strong> — <%= f.data(h.inicio) %> até <%= h.fim ? f.data(h.fim) : 'hoje' %><%= h.motivo ? ' · ' + h.motivo : '' %></li><% }) %></ul>
+</section>
+<%- include('../partials/rodape') %>

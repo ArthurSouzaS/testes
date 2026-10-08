@@ -1,0 +1,18 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-sala') %>
+<div class="grade-2">
+  <section class="cartao"><h2>Metas e objetivos de aprendizagem</h2><p class="dica">Ficam disponíveis para todos os tutores da sala (RF16).</p>
+    <form method="post" action="/professor/salas/<%= sala.id %>/metas" class="form"><%- include('../partials/csrf') %>
+      <label>Metas<textarea name="metas" rows="4" placeholder="Ex.: todos os tutorados com média ≥ 7 em Cartografia até o 2º trimestre"><%= sala.metas || '' %></textarea></label>
+      <label>Objetivos<textarea name="objetivos" rows="4" placeholder="Ex.: interpretar mapas, escalas e projeções"><%= sala.objetivos || '' %></textarea></label>
+      <button class="botao primario">Salvar</button></form></section>
+  <section class="cartao"><h2>Critérios da rubrica</h2><p class="dica">Rubrica simples com pontuação definida por você. O tutor a preenche ao final de cada trimestre.</p>
+    <% if (!criterios.length) { %><p class="vazio">Nenhum critério definido.</p><% } %>
+    <ul class="lista-simples"><% criterios.forEach((c) => { %><li><span><strong><%= c.nome %></strong> — até <%= c.pontuacao_max %> pts<small class="meta"><%= c.descricao || '' %></small></span>
+      <form method="post" action="/professor/salas/<%= sala.id %>/criterios/<%= c.id %>/excluir" data-confirmar="Remover este critério?"><%- include('../partials/csrf') %><button class="botao link perigo pequeno" aria-label="Remover critério"><%- include('../partials/icone',{nome:'x'}) %></button></form></li><% }) %></ul>
+    <form method="post" action="/professor/salas/<%= sala.id %>/criterios" class="form"><%- include('../partials/csrf') %>
+      <div class="grade-2"><label>Critério<input name="nome" required maxlength="80" placeholder="Ex.: Participação"></label><label>Pontuação máxima<input name="pontuacao_max" type="number" min="1" max="100" value="10" required></label></div>
+      <label>Descrição (opcional)<input name="descricao" maxlength="200"></label>
+      <button class="botao secundario">Adicionar critério</button></form></section>
+</div>
+<%- include('../partials/rodape') %>

@@ -1,0 +1,36 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho">
+  <div><p class="sobretitulo"><%= at.sala_nome %> · <%= at.tutoria_id ? 'Atividade da tutoria' : 'Atividade da sala' %></p><h1><%= at.titulo %></h1></div>
+  <% if (rel === 'professor' && !at.tutoria_id || at.autor_id === usuario.id) { %>
+    <form method="post" action="/atividades/<%= at.id %>/excluir" data-confirmar="Excluir esta atividade?"><%- include('../partials/csrf') %><button class="botao link perigo">Excluir</button></form>
+  <% } %>
+</div>
+<div class="grade-2">
+  <section class="cartao">
+    <dl class="dados">
+      <dt>Modelo</dt><dd><%= d.MODELOS[at.modelo].nome %></dd>
+      <dt>Tipo</dt><dd><%= d.TIPOS_ATIVIDADE[at.tipo] || at.tipo %></dd>
+      <dt>Conteúdo</dt><dd><%= at.conteudo_nome || '—' %></dd>
+      <dt>Trimestre</dt><dd><%= d.ETAPAS[at.etapa] %></dd>
+      <dt>Valor</dt><dd><%= f.nota(at.valor) %> pontos</dd>
+      <dt>Prazo</dt><dd><%= f.dataHora(at.prazo) %> <%= at.encerrada ? '(encerrado)' : '' %></dd>
+      <dt>Autor</dt><dd><%= at.autor_nome %></dd>
+    </dl>
+    <p class="texto"><%= at.enunciado %></p>
+    <% if (at.questoes.length) { %><details><summary><%= at.questoes.length %> questão(ões)</summary><ol class="questoes-lista">
+      <% at.questoes.forEach((q) => { %><li><%= q.enunciado %><% if (q.alternativas) { %><ol type="a"><% q.alternativas.forEach((a, i) => { %><li class="<%= q.correta === i ? 'correta' : '' %>"><%= a %><%= q.correta === i ? ' ✓' : '' %></li><% }) %></ol><% } %></li><% }) %>
+    </ol></details><% } %>
+  </section>
+  <section class="cartao">
+    <h2>Entregas <small><%= entregas.filter((e) => e.id).length %>/<%= entregas.length %></small></h2>
+    <table class="tabela"><thead><tr><th>Aluno</th><th>Situação</th><th>Nota</th><th></th></tr></thead><tbody>
+      <% entregas.forEach((e) => { %><tr>
+        <td><%= e.aluno_nome %></td>
+        <td><% if (e.id) { %><%- include('../partials/status',{status:e.status}) %><% if (e.contestacao_aberta) { %> <span class="selo selo-perigo">Contestada</span><% } %><% } else { %><span class="selo selo-neutro"><%= at.encerrada ? 'Não entregou' : 'Aguardando' %></span><% } %></td>
+        <td><%= e.status === 'corrigida' ? f.nota(e.nota) : '—' %></td>
+        <td><% if (e.id) { %><a class="botao pequeno <%= e.status === 'enviada' ? 'primario' : 'secundario' %>" href="/entregas/<%= e.id %>"><%= e.status === 'enviada' ? 'Corrigir' : 'Ver' %></a><% } %></td>
+      </tr><% }) %>
+    </tbody></table>
+  </section>
+</div>
+<%- include('../partials/rodape') %>

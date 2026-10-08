@@ -1,0 +1,6 @@
+<form method="post" action="/professor/tutorias/<%= t.id %>/validar" class="form-inline"><%- include('../partials/csrf') %>
+  <input type="hidden" name="tabela" value="<%= tabela %>"><input type="hidden" name="registro_id" value="<%= x.id %>"><input type="hidden" name="ancora" value="<%= tabela %>">
+  <input name="comentario" placeholder="Consideração do professor (opcional)" value="<%= x.validacao_comentario || '' %>" aria-label="Comentário de validação">
+  <button name="status" value="validado" class="botao secundario pequeno"><%- include('../partials/icone',{nome:'check'}) %>Validar</button>
+  <button name="status" value="ajuste" class="botao link perigo pequeno">Pedir ajuste</button>
+</form>

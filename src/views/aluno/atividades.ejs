@@ -1,0 +1,16 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><h1>Atividades</h1></div>
+<nav class="segmento pequeno" aria-label="Filtro">
+  <% [['todas','Todas'],['pendentes','A fazer'],['enviadas','Enviadas'],['corrigidas','Corrigidas'],['encerradas','Encerradas']].forEach(([k,v]) => { %><a href="?filtro=<%= k %>" class="<%= filtro === k ? 'ativo' : '' %>"><%= v %></a><% }) %>
+</nav>
+<% if (!lista.length) { %><p class="vazio cartao">Nenhuma atividade aqui.</p><% } %>
+<div class="lista-atividades">
+<% lista.forEach((a) => { %>
+  <a class="cartao atividade-item" href="/atividades/<%= a.id %>">
+    <div><span class="sobretitulo"><%= a.sala_nome %> · <%= a.tutoria_id ? 'do tutor' : 'da sala' %> · <%= d.ETAPAS[a.etapa] %></span><h2><%= a.titulo %></h2>
+      <p class="meta"><%= d.MODELOS[a.modelo].nome %><%= a.conteudo_nome ? ' · ' + a.conteudo_nome : '' %> · prazo <%= f.dataHora(a.prazo) %></p></div>
+    <div class="direita"><%- include('../partials/status',{status:a.situacao}) %><% if (a.entrega_status === 'corrigida') { %><span class="nota-media"><%= f.nota(a.nota) %>/<%= f.nota(a.valor) %></span><% } %></div>
+  </a>
+<% }) %>
+</div>
+<%- include('../partials/rodape') %>

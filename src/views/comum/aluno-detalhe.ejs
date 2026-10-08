@@ -1,0 +1,47 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><div><p class="sobretitulo"><a href="<%= voltar %>"><%= sala.nome %> · <%= sala.ano_letivo %></a></p><h1><%= aluno.nome %></h1>
+  <p class="meta"><%= aluno.email %><%= tutoria ? ' · Tutor(a): ' + tutoria.tutor_nome : ' · Sem tutor' %></p></div>
+  <% if (papelVisao === 'tutor') { %><a class="botao secundario" href="/mensagens/<%= tutoria.id %>-<%= aluno.id %>"><%- include('../partials/icone',{nome:'chat'}) %>Conversar</a><% } %></div>
+<div class="grade-2">
+  <%- include('../partials/desempenho-aluno') %>
+  <section class="cartao">
+    <h2>Conteúdos de Geografia</h2>
+    <% if (!desempenho.conteudos.length) { %><p class="vazio">Sem registros ainda.</p><% } %>
+    <ul class="lista-simples">
+      <% desempenho.conteudos.forEach((c) => { %><li><span><%= c.nome %> <small class="meta"><%= c.origem === 'registro' ? 'registrado por ' + c.registrado_por_nome : 'média ' + f.nota(c.media) + ' em ' + c.qtd + ' atividade(s)' %></small></span><%- include('../partials/status',{status:c.situacao}) %></li><% }) %>
+    </ul>
+    <% if (podeEditar) { %>
+    <form method="post" action="/conteudos" class="form-inline">
+      <%- include('../partials/csrf') %><input type="hidden" name="sala_id" value="<%= sala.id %>"><input type="hidden" name="aluno_id" value="<%= aluno.id %>">
+      <select name="conteudo_id" required aria-label="Conteúdo"><option value="">Conteúdo…</option><% catalogo.forEach((c) => { %><option value="<%= c.id %>"><%= c.nome %></option><% }) %></select>
+      <select name="situacao" aria-label="Situação"><option value="dominado">Dominado</option><option value="treinar">Precisa treinar</option><option value="auto">Automático (pelas notas)</option></select>
+      <button class="botao secundario pequeno">Registrar</button>
+    </form><% } %>
+  </section>
+</div>
+<section class="cartao">
+  <h2>Notas das atividades</h2>
+  <% if (!desempenho.notas.length) { %><p class="vazio">Nenhuma atividade corrigida.</p><% } else { %>
+  <div class="rolagem"><table class="tabela"><thead><tr><th>Atividade</th><th>Trimestre</th><th>Conteúdo</th><th>Nota</th><th>Nota (0-10)</th><th></th></tr></thead><tbody>
+    <% desempenho.notas.forEach((n) => { %><tr><td><%= n.titulo %></td><td><%= n.etapa %>º</td><td><%= n.conteudo_nome || '—' %></td><td><%= f.nota(n.nota) %>/<%= f.nota(n.valor) %></td><td><%- include('../partials/nota',{valor:n.nota10}) %></td><td><a href="/entregas/<%= n.entrega_id %>">Ver</a></td></tr><% }) %>
+  </tbody></table></div><% } %>
+</section>
+<div class="grade-2">
+  <section class="cartao"><h2>Rubricas do tutor</h2>
+    <% if (!rubricas.length) { %><p class="vazio">Nenhuma rubrica preenchida.</p><% } %>
+    <% rubricas.forEach((r) => { %><div class="rubrica"><div class="linha-acao"><strong><%= d.ETAPAS[r.etapa] %></strong><%- include('../partials/nota',{valor:r.nota}) %><%- include('../partials/status',{status:r.validacao_status}) %></div>
+      <ul class="itens"><% r.itens.forEach((i) => { %><li><%= i.criterio_nome %>: <strong><%= f.nota(i.pontos) %></strong>/<%= i.pontuacao_max %></li><% }) %></ul><% if (r.comentario) { %><p class="texto"><%= r.comentario %></p><% } %></div><% }) %>
+  </section>
+  <% if (papelVisao === 'professor') { %>
+  <section class="cartao"><h2>Observações do professor</h2>
+    <% if (tutoria && podeEditar) { %>
+    <form method="post" action="/professor/tutorias/<%= tutoria.id %>/observacoes" class="form">
+      <%- include('../partials/csrf') %><input type="hidden" name="aluno_id" value="<%= aluno.id %>">
+      <label>Tipo<select name="tipo"><% Object.entries(d.TIPOS_OBSERVACAO).forEach(([k,v]) => { %><option value="<%= k %>"><%= v %></option><% }) %></select></label>
+      <label>Observação<textarea name="texto" rows="2" required></textarea></label>
+      <button class="botao secundario">Registrar observação</button>
+    </form><% } else if (!tutoria) { %><p class="dica">Vincule o aluno a um tutor para registrar observações da tutoria.</p><% } %>
+    <ul class="linha-tempo"><% observacoes.forEach((o) => { %><li><span class="selo selo-<%= o.tipo === 'dificuldade' ? 'aviso' : o.tipo === 'avanco' ? 'ok' : 'info' %>"><%= d.TIPOS_OBSERVACAO[o.tipo] %></span> <%= o.texto %><small class="meta"> — <%= o.autor_nome %>, <%= f.data(o.criado_em) %></small></li><% }) %></ul>
+  </section><% } %>
+</div>
+<%- include('../partials/rodape') %>

@@ -1,0 +1,37 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><div><p class="sobretitulo">Olá, <%= usuario.nome.split(' ')[0] %></p><h1>Painel do professor</h1></div>
+  <a class="botao primario" href="/professor/salas/nova?ano=<%= ano %>&serie=<%= serie || 1 %>"><%- include('../partials/icone',{nome:'mais'}) %>Nova sala</a></div>
+<div class="kpis">
+  <a class="kpi" href="/professor/pedidos"><span>Pedidos de tutoria</span><strong><%= pend.pedidos %></strong></a>
+  <div class="kpi"><span>Contestações abertas</span><strong><%= pend.contestacoes %></strong></div>
+  <div class="kpi"><span>Registros a validar</span><strong><%= pend.registros %></strong></div>
+  <div class="kpi"><span>Rubricas a validar</span><strong><%= pend.rubricas %></strong></div>
+</div>
+<section class="filtros" aria-label="Filtros">
+  <form method="get" class="form-inline">
+    <label>Ano letivo <select name="ano" data-auto-enviar><% anos.forEach((a) => { %><option <%= a === ano ? 'selected' : '' %>><%= a %></option><% }) %></select></label>
+    <% if (serie) { %><input type="hidden" name="serie" value="<%= serie %>"><% } %>
+  </form>
+  <nav class="segmento pequeno" aria-label="Ano do Ensino Médio">
+    <a href="?ano=<%= ano %>" class="<%= !serie ? 'ativo' : '' %>">Todos</a>
+    <% [1,2,3].forEach((s) => { %><a href="?ano=<%= ano %>&serie=<%= s %>" class="<%= serie === s ? 'ativo' : '' %>"><%= d.SERIES[s] %></a><% }) %>
+  </nav>
+</section>
+<% if (!lista.length) { %>
+  <div class="vazio cartao centro"><%- include('../partials/icone',{nome:'sala'}) %><p>Nenhuma sala em <%= ano %><%= serie ? ' para o ' + d.SERIES[serie] : '' %>.</p><a class="botao primario" href="/professor/salas/nova?ano=<%= ano %>&serie=<%= serie || 1 %>">Criar sala</a></div>
+<% } %>
+<div class="cartoes">
+  <% lista.forEach((s) => { %>
+    <a class="cartao sala-cartao" href="/professor/salas/<%= s.id %>">
+      <span class="sobretitulo"><%= d.SERIES[s.serie] %> · <%= s.ano_letivo %></span>
+      <h2><%= s.nome %></h2>
+      <ul class="numeros"><li><strong><%= s.total_alunos %></strong> alunos</li><li><strong><%= s.tutorias_ativas %></strong> tutorias ativas</li></ul>
+      <div class="selos">
+        <% if (s.sem_tutor) { %><span class="selo selo-aviso"><%= s.sem_tutor %> sem tutor</span><% } %>
+        <% if (s.entregas_pendentes) { %><span class="selo selo-info"><%= s.entregas_pendentes %> a corrigir</span><% } %>
+        <% if (!s.sem_tutor && !s.entregas_pendentes) { %><span class="selo selo-ok">Em dia</span><% } %>
+      </div>
+    </a>
+  <% }) %>
+</div>
+<%- include('../partials/rodape') %>

@@ -1,0 +1,49 @@
+<%- include('../partials/topo') %>
+<% const def = d.MODELOS[at.modelo]; const pode = !bloqueada && !at.encerrada && (!entrega || entrega.status === 'enviada');
+   const resp = (q) => (entrega && entrega.respostas[q.id]) || {}; const coments = (qid) => comentarios.filter((c) => (c.questao_id || null) === qid);
+   const aberta = contestacoes.find((c) => c.status === 'aberta'); %>
+<div class="cabecalho"><div><p class="sobretitulo"><a href="/aluno/atividades">Atividades</a> · <%= at.sala_nome %> · <%= d.ETAPAS[at.etapa] %></p><h1><%= at.titulo %></h1>
+  <p class="meta"><%= d.TIPOS_ATIVIDADE[at.tipo] %> · <%= def.nome %><%= at.conteudo_nome ? ' · ' + at.conteudo_nome : '' %> · por <%= at.autor_nome %></p></div>
+  <%- include('../partials/status',{status: entrega ? entrega.status : (at.encerrada ? 'encerradas' : 'pendentes')}) %></div>
+<div class="grade-lateral">
+  <div>
+    <section class="cartao"><h2>Orientações</h2><p class="texto"><%= at.enunciado %></p>
+      <p class="meta"><%- include('../partials/icone',{nome:'relogio'}) %> Prazo: <strong><%= f.dataHora(at.prazo) %></strong> (<%= f.relativo(at.prazo) %>) · Valor: <%= f.nota(at.valor) %> pontos</p></section>
+    <% if (bloqueada) { %><div class="alerta alerta-info"><span>Sua tutoria foi finalizada: a atividade está disponível apenas para consulta (RN14).</span></div><% } %>
+    <form method="post" action="/atividades/<%= at.id %>/entregar" enctype="multipart/form-data" class="form">
+      <input type="hidden" name="_csrf" value="<%= csrf %>"><fieldset class="sem-borda" <%= pode ? '' : 'disabled' %>>
+      <% at.questoes.forEach((q) => { const r = resp(q); %>
+        <section class="cartao questao" id="q<%= q.id %>"><h3>Questão <%= q.ordem %></h3><p><%= q.enunciado %></p>
+          <% if (q.alternativas) { %><fieldset class="alternativas-escolha"><legend class="sr">Alternativas</legend>
+            <% q.alternativas.forEach((a, i) => { %><label class="opcao <%= entrega && entrega.status === 'corrigida' && q.correta === i ? 'certa' : '' %>"><input type="radio" name="q<%= q.id %>_alt" value="<%= i %>" <%= r.alternativa === i ? 'checked' : '' %> required><span><%= String.fromCharCode(97 + i) %>) <%= a %></span></label><% }) %></fieldset>
+            <% if (q.exige_justificativa) { %><label>Justifique sua resposta<textarea name="q<%= q.id %>_texto" rows="3" required minlength="5"><%= r.texto || '' %></textarea></label><% } %>
+          <% } else { %><label>Sua resposta<textarea name="q<%= q.id %>_texto" rows="5" required><%= r.texto || '' %></textarea></label><% } %>
+          <% coments(q.id).forEach((c) => { %><div class="comentario"><strong><%= c.autor_nome %></strong> <small><%= c.autor_papel === 'professor' ? 'Professor' : 'Tutor' %> · <%= f.relativo(c.criado_em) %></small><p><%= c.texto %></p></div><% }) %>
+        </section>
+      <% }) %>
+      <section class="cartao"><h3><%= def.semQuestoes ? 'Sua entrega' : 'Anexos e observações (opcional)' %></h3>
+        <% if (arquivos.length) { %><ul class="arquivos"><% arquivos.forEach((a) => { %><li><a href="/arquivos/<%= a.id %>" target="_blank" rel="noopener"><%- include('../partials/icone',{nome:'clipe'}) %><%= a.nome_original %></a> <small><%= f.tamanhoArquivo(a.tamanho) %></small></li><% }) %></ul><% } %>
+        <% if (pode) { %><label>Anexar arquivos (imagens, PDF, Word — até 10 MB)<input type="file" name="arquivos" multiple accept="image/*,.pdf,.doc,.docx,.txt,.ppt,.pptx" <%= def.semQuestoes && !arquivos.length ? 'required' : '' %>></label><% } %>
+        <label>Observação para o tutor<textarea name="texto" rows="2"><%= entrega ? (entrega.texto || '') : '' %></textarea></label>
+      </section>
+      <% if (pode) { %><button class="botao primario largo"><%- include('../partials/icone',{nome:'enviar'}) %><%= entrega ? 'Reenviar resposta' : 'Enviar resposta' %></button><% } %>
+    </fieldset></form>
+  </div>
+  <aside>
+    <section class="cartao destaque"><h2>Status do envio</h2>
+      <% if (!entrega) { %><p><%= at.encerrada ? 'Prazo encerrado sem envio.' : 'Você ainda não enviou esta atividade.' %></p>
+      <% } else { %><p>Enviado em <strong><%= f.dataHora(entrega.enviado_em) %></strong></p>
+        <% if (entrega.status === 'corrigida') { %><p class="nota-grande"><%= f.nota(entrega.nota) %><small>/<%= f.nota(at.valor) %></small></p><p class="meta">Corrigido por <%= entrega.corretor_nome %> · <%= f.dataHora(entrega.corrigido_em) %></p>
+          <% if (entrega.feedback) { %><div class="comentario"><strong>Feedback</strong><p><%= entrega.feedback %></p></div><% } %>
+        <% } else { %><p class="dica">Aguardando correção. Você pode reenviar até o prazo.</p><% } %>
+      <% } %>
+      <% coments(null).forEach((c) => { %><div class="comentario"><strong><%= c.autor_nome %></strong><p><%= c.texto %></p></div><% }) %>
+    </section>
+    <% if (entrega && entrega.status === 'corrigida') { %><section class="cartao"><h2>Contestar a nota</h2>
+      <% contestacoes.forEach((c) => { %><div class="contestacao"><%- include('../partials/status',{status:c.status}) %><p><%= c.justificativa %></p><% if (c.resposta) { %><p><strong>Resposta:</strong> <%= c.resposta %></p><% } %></div><% }) %>
+      <% if (!aberta && !bloqueada) { %><form method="post" action="/entregas/<%= entrega.id %>/contestar" class="form"><%- include('../partials/csrf') %>
+        <label>Por que a nota deve ser revista?<textarea name="justificativa" rows="3" required minlength="10"></textarea></label><button class="botao secundario largo">Enviar contestação</button></form><% } %>
+    </section><% } %>
+  </aside>
+</div>
+<%- include('../partials/rodape') %>

@@ -1,0 +1,25 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-sala') %>
+<div class="grade-2">
+  <section class="cartao"><h2>Alunos da sala (<%= alunos.length %>)</h2>
+    <% if (!alunos.length) { %><p class="vazio">Nenhum aluno incluído ainda.</p><% } %>
+    <ul class="lista-simples">
+      <% alunos.forEach((a) => { %><li><span><a href="/professor/salas/<%= sala.id %>/alunos/<%= a.id %>"><%= a.nome %></a><small class="meta"><%= a.email %></small></span>
+        <span class="linha-acao"><% if (a.eh_tutor) { %><span class="selo selo-info">Tutor(a)</span><% } else if (a.tutor_nome) { %><span class="selo selo-ok"><%= a.tutor_nome.split(' ')[0] %></span><% } else { %><span class="selo selo-aviso">Sem tutor</span><% } %>
+        <% if (!a.tutoria_id) { %><form method="post" action="/professor/salas/<%= sala.id %>/alunos/<%= a.id %>/remover" data-confirmar="Remover <%= a.nome %> da sala?"><%- include('../partials/csrf') %><button class="botao link perigo pequeno" aria-label="Remover <%= a.nome %>"><%- include('../partials/icone',{nome:'x'}) %></button></form><% } %></span></li><% }) %>
+    </ul>
+  </section>
+  <section class="cartao"><h2>Incluir alunos</h2>
+    <p class="dica">Alunos com cadastro ativo. O cadastro de anos anteriores é reaproveitado — basta incluir na sala do ano vigente (RN19).</p>
+    <form method="get" class="form-inline"><input name="busca" value="<%= busca %>" placeholder="Buscar por nome ou e-mail" aria-label="Buscar aluno"><button class="botao secundario pequeno">Buscar</button></form>
+    <form method="post" action="/professor/salas/<%= sala.id %>/alunos" class="form">
+      <%- include('../partials/csrf') %>
+      <div class="lista-check">
+        <% if (!disponiveis.length) { %><p class="vazio">Nenhum aluno disponível.</p><% } %>
+        <% disponiveis.forEach((a) => { %><label class="opcao"><input type="checkbox" name="alunos" value="<%= a.id %>"><span><%= a.nome %><small class="meta"><%= a.email %><%= a.historico ? ' · já esteve em: ' + a.historico : '' %></small></span></label><% }) %>
+      </div>
+      <% if (disponiveis.length) { %><button class="botao primario">Incluir selecionados</button><% } %>
+    </form>
+  </section>
+</div>
+<%- include('../partials/rodape') %>

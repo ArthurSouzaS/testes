@@ -1,0 +1,12 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><div><p class="sobretitulo">Área do tutor</p><h1>Minhas tutorias</h1></div><a class="botao secundario" href="/tutor/desempenho"><%- include('../partials/icone',{nome:'grafico'}) %>Meu desempenho</a></div>
+<div class="cartoes">
+<% lista.forEach((t) => { %>
+  <a class="cartao sala-cartao" href="/tutor/tutorias/<%= t.id %>">
+    <span class="sobretitulo"><%= d.SERIES[t.serie] %> · <%= t.ano_letivo %></span><h2><%= t.sala_nome %></h2>
+    <ul class="numeros"><li><strong><%= t.total_tutorados %></strong> tutorados</li><li><strong><%= t.pendencias.entregas.length %></strong> a corrigir</li><li><strong><%= t.duvidasAbertas %></strong> dúvidas</li></ul>
+    <div class="selos"><%- include('../partials/status',{status:t.status}) %><% if (t.pendencias.contestacoes.length) { %><span class="selo selo-perigo"><%= t.pendencias.contestacoes.length %> contestação(ões)</span><% } %></div>
+  </a>
+<% }) %>
+</div>
+<%- include('../partials/rodape') %>

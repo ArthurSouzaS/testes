@@ -1,0 +1,22 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-tutoria') %>
+<% const mes = new Date().getMonth() + 1; const etapaAtual = mes <= 4 ? 1 : mes <= 8 ? 2 : 3; %>
+<div class="grade-lateral">
+  <div>
+    <% if (!rubricas.length) { %><p class="vazio cartao">Nenhuma rubrica preenchida ainda.</p><% } %>
+    <% rubricas.forEach((r) => { %><article class="cartao"><div class="linha-acao"><strong><%= r.aluno_nome %> · <%= d.ETAPAS[r.etapa] %></strong><span class="linha-acao"><%- include('../partials/nota',{valor:r.nota}) %><%- include('../partials/status',{status:r.validacao_status}) %></span></div>
+      <ul class="itens"><% r.itens.forEach((i) => { %><li><%= i.criterio_nome %>: <%= f.nota(i.pontos) %>/<%= i.pontuacao_max %></li><% }) %></ul>
+      <% if (r.comentario) { %><p class="texto"><%= r.comentario %></p><% } %><% if (r.validacao_comentario) { %><p class="meta">Professor: <%= r.validacao_comentario %></p><% } %></article><% }) %>
+  </div>
+  <aside><section class="cartao destaque"><h2>Preencher rubrica</h2>
+    <% if (!criterios.length) { %><p class="vazio">O professor ainda não definiu os critérios.</p><% } else if (!t.ativa) { %><p class="vazio">Tutoria finalizada.</p><% } else { %>
+    <p class="dica">Feedback ao final de cada trimestre. Preencher de novo atualiza a rubrica.</p>
+    <form method="post" action="/tutor/tutorias/<%= t.id %>/rubricas" class="form"><%- include('../partials/csrf') %>
+      <label>Tutorado<select name="aluno_id" required><% t.tutorados.forEach((a) => { %><option value="<%= a.id %>"><%= a.nome %></option><% }) %></select></label>
+      <label>Trimestre<select name="etapa"><% [1,2,3].forEach((e) => { %><option value="<%= e %>" <%= e === etapaAtual ? 'selected' : '' %>><%= d.ETAPAS[e] %></option><% }) %></select></label>
+      <% criterios.forEach((c) => { %><label><%= c.nome %> (0–<%= c.pontuacao_max %>)<input name="c<%= c.id %>" type="number" min="0" max="<%= c.pontuacao_max %>" step="0.5" required><% if (c.descricao) { %><small class="dica"><%= c.descricao %></small><% } %></label><% }) %>
+      <label>Feedback (sincero e respeitoso)<textarea name="comentario" rows="3"></textarea></label>
+      <button class="botao primario largo">Salvar rubrica</button></form><% } %>
+  </section></aside>
+</div>
+<%- include('../partials/rodape') %>

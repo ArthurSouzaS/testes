@@ -1,0 +1,12 @@
+<div class="cabecalho">
+  <div>
+    <p class="sobretitulo"><a href="/professor?ano=<%= sala.ano_letivo %>&serie=<%= sala.serie %>"><%= sala.ano_letivo %> · <%= d.SERIES[sala.serie] %> do Ensino Médio</a></p>
+    <h1><%= sala.nome %></h1>
+  </div>
+  <a class="botao secundario" href="/professor/salas/<%= sala.id %>/editar">Editar sala</a>
+</div>
+<nav class="abas" aria-label="Seções da sala">
+  <% [['geral','', 'Visão geral'],['alunos','/alunos','Alunos'],['tutorias','/tutorias','Tutores e vínculos'],['atividades','/atividades','Atividades'],['avisos','/avisos','Avisos'],['metas','/metas','Metas e critérios'],['desempenho','/desempenho','Desempenho']].forEach(([id, sufixo, nome]) => { %>
+    <a class="<%= aba === id ? 'ativa' : '' %>" href="/professor/salas/<%= sala.id %><%= sufixo %>"><%= nome %></a>
+  <% }) %>
+</nav>

@@ -1,0 +1,9 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-tutoria') %>
+<div class="linha-acao"><p class="dica">Atividades da sala (do professor) e as que você criou. Você corrige as entregas dos seus tutorados.</p>
+  <% if (t.ativa && t.pode_criar_atividades) { %><a class="botao primario" href="/tutor/tutorias/<%= t.id %>/atividades/nova"><%- include('../partials/icone',{nome:'mais'}) %>Nova atividade</a><% } %></div>
+<% if (!lista.length) { %><p class="vazio cartao">Nenhuma atividade.</p><% } else { %>
+<div class="cartao rolagem"><table class="tabela"><thead><tr><th>Atividade</th><th>Origem</th><th>Prazo</th><th>Entregas</th><th>A corrigir</th></tr></thead><tbody>
+  <% lista.forEach((a) => { %><tr><td><a href="/atividades/<%= a.id %>"><%= a.titulo %></a><small class="meta"><%= d.MODELOS[a.modelo].nome %><%= a.conteudo_nome ? ' · ' + a.conteudo_nome : '' %></small></td><td><%= a.tutoria_id ? 'Minha' : 'Professor' %></td><td><%= f.dataHora(a.prazo) %></td><td><%= a.entregues %>/<%= t.tutorados.length %></td><td><% if (a.a_corrigir) { %><span class="selo selo-aviso"><%= a.a_corrigir %></span><% } else { %>—<% } %></td></tr><% }) %>
+</tbody></table></div><% } %>
+<%- include('../partials/rodape') %>

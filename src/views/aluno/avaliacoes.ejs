@@ -1,0 +1,26 @@
+<%- include('../partials/topo') %>
+<% const mes = new Date().getMonth() + 1; const etapaAtual = mes <= 4 ? 1 : mes <= 8 ? 2 : 3; %>
+<div class="cabecalho"><h1>Feedbacks e avaliação do tutor</h1></div>
+<div class="grade-2">
+  <section class="cartao"><h2>Rubricas que recebi</h2><p class="dica">Feedback do seu tutor ao final de cada trimestre.</p>
+    <% if (!rubricas.length) { %><p class="vazio">Nenhum feedback ainda.</p><% } %>
+    <% rubricas.forEach((r) => { %><article class="registro"><div class="linha-acao"><strong><%= d.ETAPAS[r.etapa] %> · <%= r.sala_nome %></strong><%- include('../partials/nota',{valor:r.nota}) %></div>
+      <ul class="itens"><% r.itens.forEach((i) => { %><li><%= i.criterio_nome %>: <strong><%= f.nota(i.pontos) %></strong>/<%= i.pontuacao_max %></li><% }) %></ul>
+      <% if (r.comentario) { %><p class="texto"><%= r.comentario %></p><% } %><p class="meta">Por <%= r.tutor_nome %><%= r.validacao_status === 'validado' ? ' · validado pelo professor' : '' %></p></article><% }) %>
+  </section>
+  <div>
+  <% tutorias.forEach((s) => { %>
+    <section class="cartao"><h2>Avaliar meu tutor: <%= s.tutor_nome %></h2><p class="dica">Sua avaliação é sincera e respeitosa e compõe o desempenho do tutor (RN12). De 1 (precisa melhorar) a 5 (excelente).</p>
+      <% if (s.minhas.length) { %><ul class="lista-simples"><% s.minhas.forEach((a) => { %><li><%= d.ETAPAS[a.etapa] %><%- include('../partials/nota',{valor:a.nota}) %></li><% }) %></ul><% } %>
+      <% if (s.tutoria_status === 'ativa') { %>
+      <form method="post" action="/aluno/avaliacoes" class="form"><%- include('../partials/csrf') %><input type="hidden" name="tutoria_id" value="<%= s.tutoria_id %>">
+        <label>Trimestre<select name="etapa"><% [1,2,3].forEach((e) => { %><option value="<%= e %>" <%= e === etapaAtual ? 'selected' : '' %>><%= d.ETAPAS[e] %></option><% }) %></select></label>
+        <% d.CRITERIOS_AVALIACAO_TUTOR.forEach((c) => { %><fieldset class="escala"><legend><%= c.nome %> <small class="dica"><%= c.descricao %></small></legend>
+          <% [1,2,3,4,5].forEach((n) => { %><label><input type="radio" name="<%= c.chave %>" value="<%= n %>" required><span><%= n %></span></label><% }) %></fieldset><% }) %>
+        <label>Comentário (opcional)<textarea name="comentario" rows="2"></textarea></label>
+        <button class="botao primario">Enviar avaliação</button></form><% } %>
+    </section>
+  <% }) %>
+  </div>
+</div>
+<%- include('../partials/rodape') %>

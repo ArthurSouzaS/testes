@@ -1,0 +1,67 @@
+<%- include('head') %>
+<body class="app">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo">
+  <button type="button" class="topo-menu" data-abrir-menu aria-label="Abrir menu"><%- include('icone', {nome:'menu'}) %></button>
+  <a class="marca" href="/"><img src="/img/logo.svg" alt="" width="32" height="32"><span>Protutal</span></a>
+  <div class="topo-dir">
+    <%- include('acessibilidade') %>
+    <a class="sino" href="/notificacoes" aria-label="Notificações">
+      <%- include('icone', {nome:'sino'}) %><span class="contador" data-contador <%= naoLidas ? '' : 'hidden' %>><%= naoLidas %></span>
+    </a>
+    <a class="avatar" href="/perfil" title="<%= usuario.nome %>"><%= f.iniciais(usuario.nome) %></a>
+  </div>
+</header>
+<%
+  const ativo = (p) => caminho === p || (p !== '/aluno' && p !== '/professor' && p !== '/tutor' && caminho.startsWith(p)) ? 'ativo' : '';
+  const item = (href, icone, texto, extra) => ({ href, icone, texto, extra });
+  let grupos;
+  if (usuario.papel === 'professor') {
+    grupos = [{ titulo: 'Professor', itens: [
+      item('/professor', 'home', 'Painel e salas'),
+      item('/professor/pedidos', 'users', 'Pedidos de tutoria'),
+      item('/professor/historico', 'historico', 'Histórico de tutorias'),
+    ]}];
+  } else {
+    grupos = [{ titulo: 'Aluno', itens: [
+      item('/aluno', 'home', 'Meu desempenho'),
+      item('/aluno/atividades', 'tarefa', 'Atividades'),
+      item('/aluno/apoio', 'livro', 'Dúvidas e materiais'),
+      item('/aluno/avisos', 'megafone', 'Avisos'),
+      item('/aluno/avaliacoes', 'estrela', 'Feedbacks'),
+    ]}];
+    if (ehTutor) grupos.push({ titulo: 'Tutor', itens: [
+      item('/tutor', 'users', 'Minhas tutorias'),
+      item('/tutor/desempenho', 'grafico', 'Meu desempenho como tutor'),
+    ]});
+    grupos.push({ titulo: 'Comunicação', itens: [item('/mensagens', 'chat', 'Mensagens')] });
+  }
+%>
+<nav class="lateral" id="menu" aria-label="Menu principal">
+  <div class="lateral-perfil">
+    <span class="avatar grande"><%= f.iniciais(usuario.nome) %></span>
+    <div><strong><%= usuario.nome %></strong>
+      <span class="papel"><%= usuario.papel === 'professor' ? 'Professor(a)' : (ehTutor ? 'Aluno · Tutor' : 'Aluno') %></span></div>
+  </div>
+  <% for (const g of grupos) { %>
+    <p class="lateral-titulo"><%= g.titulo %></p>
+    <ul>
+      <% for (const it of g.itens) { %>
+        <li><a class="<%= ativo(it.href) %>" href="<%= it.href %>"><%- include('icone', {nome: it.icone}) %><%= it.texto %></a></li>
+      <% } %>
+    </ul>
+  <% } %>
+  <p class="lateral-titulo">Conta</p>
+  <ul>
+    <li><a class="<%= ativo('/notificacoes') %>" href="/notificacoes"><%- include('icone', {nome:'sino'}) %>Notificações</a></li>
+    <li><a class="<%= ativo('/perfil') %>" href="/perfil"><%- include('icone', {nome:'perfil'}) %>Meu perfil</a></li>
+    <li><form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="link-menu"><%- include('icone', {nome:'sair'}) %>Sair</button></form></li>
+  </ul>
+</nav>
+<div class="veu" data-fechar-menu></div>
+<main id="conteudo" class="conteudo" data-live>
+<% if (flash) { %>
+  <div class="alerta alerta-<%= flash.tipo %>" role="<%= flash.tipo === 'erro' ? 'alert' : 'status' %>">
+    <%- include('icone', {nome: flash.tipo === 'erro' ? 'x' : 'check'}) %><span><%= flash.texto %></span>
+  </div>
+<% } %>

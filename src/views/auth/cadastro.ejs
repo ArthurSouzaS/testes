@@ -1,0 +1,41 @@
+<%- include('_topo') %>
+<main class="central" id="conteudo">
+  <section class="cartao cadastro-cartao">
+    <h1>Criar conta</h1>
+    <div class="segmento" role="tablist">
+      <a role="tab" href="/cadastro?perfil=aluno" class="<%= perfil === 'aluno' ? 'ativo' : '' %>"><%- include('../partials/icone',{nome:'perfil'}) %>Aluno</a>
+      <a role="tab" href="/cadastro?perfil=professor" class="<%= perfil === 'professor' ? 'ativo' : '' %>"><%- include('../partials/icone',{nome:'livro'}) %>Professor</a>
+    </div>
+    <p class="dica">Use seu e-mail institucional (<%= dominios[perfil].map((x) => '@' + x).join(', ') %>). Enviaremos um link de confirmação — a conta só é ativada depois dele.</p>
+    <% if (typeof erro !== 'undefined' && erro) { %><div class="alerta alerta-erro" role="alert"><span><%= erro %></span></div><% } %>
+    <form method="post" action="/cadastro" class="form">
+      <%- include('../partials/csrf') %>
+      <input type="hidden" name="papel" value="<%= perfil %>">
+      <% const campo = (nome, rotulo, tipo, auto) => ({nome, rotulo, tipo, auto}); %>
+      <% for (const c of [campo('nome','Nome completo','text','name'), campo('email','E-mail institucional','email','email'), campo('senha','Senha (mín. 8 caracteres, letras e números)','password','new-password'), campo('confirmacao','Confirme a senha','password','new-password')]) { %>
+        <label class="<%= erros[c.nome] ? 'invalido' : '' %>"><%= c.rotulo %>
+          <input type="<%= c.tipo %>" name="<%= c.nome %>" required autocomplete="<%= c.auto %>" value="<%= c.tipo === 'password' ? '' : (dados[c.nome] || '') %>" <%= erros[c.nome] ? 'aria-invalid=true' : '' %>>
+          <% if (erros[c.nome]) { %><small class="erro-campo"><%= erros[c.nome] %></small><% } %>
+        </label>
+      <% } %>
+      <% if (perfil === 'aluno') { %>
+        <label class="opcao"><input type="checkbox" name="querSerTutor" value="1" data-mostrar="#bloco-tutor" <%= dados.querSerTutor ? 'checked' : '' %>> Quero ser tutor(a)</label>
+        <fieldset id="bloco-tutor" class="bloco" <%= dados.querSerTutor ? '' : 'hidden' %>>
+          <legend>Pedido de tutoria</legend>
+          <p class="dica">Você será cadastrado como aluno e seu pedido ficará <strong>pendente</strong> até o professor decidir.</p>
+          <label class="<%= erros.professorId ? 'invalido' : '' %>">Professor responsável
+            <select name="professorId">
+              <option value="">Selecione…</option>
+              <% professores.forEach((p) => { %><option value="<%= p.id %>" <%= String(dados.professorId) === String(p.id) ? 'selected' : '' %>><%= p.nome %></option><% }) %>
+            </select>
+            <% if (erros.professorId) { %><small class="erro-campo"><%= erros.professorId %></small><% } %>
+          </label>
+          <label>Por que você quer ser tutor? (opcional)<textarea name="mensagem" rows="2" maxlength="500"><%= dados.mensagem || '' %></textarea></label>
+        </fieldset>
+      <% } %>
+      <button class="botao primario largo">Criar conta</button>
+    </form>
+    <p class="centro">Já tem conta? <a href="/?perfil=<%= perfil %>">Entrar</a></p>
+  </section>
+</main>
+</body></html>

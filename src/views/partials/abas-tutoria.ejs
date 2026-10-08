@@ -1,0 +1,13 @@
+<div class="cabecalho">
+  <div>
+    <p class="sobretitulo"><a href="/tutor">Minhas tutorias</a> · <%= t.ano_letivo %></p>
+    <h1><%= t.sala_nome %></h1>
+  </div>
+  <%- include('status', {status: t.status}) %>
+</div>
+<% if (!t.ativa) { %><div class="alerta alerta-info"><%- include('icone',{nome:'escudo'}) %><span>Tutoria finalizada: você pode apenas consultar o desempenho e o histórico (RN14).</span></div><% } %>
+<nav class="abas" aria-label="Seções da tutoria">
+  <% [['geral','','Visão geral'],['atividades','/atividades','Atividades'],['rubricas','/rubricas','Rubricas'],['registros','/registros','Encontros'],['materiais','/materiais','Materiais'],['comunicados','/comunicados','Comunicados'],['duvidas','/duvidas','Dúvidas']].forEach(([id, sufixo, nome]) => { %>
+    <a class="<%= aba === id ? 'ativa' : '' %>" href="/tutor/tutorias/<%= t.id %><%= sufixo %>"><%= nome %></a>
+  <% }) %>
+</nav>

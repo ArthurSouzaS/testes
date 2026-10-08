@@ -1,0 +1,8 @@
+<% if (usuario) { %><%- include('../partials/topo') %><% } else { %><%- include('../auth/_topo') %><main class="central"><% } %>
+<section class="cartao centro">
+  <div class="icone-grande erro"><%- include('../partials/icone',{nome:'x'}) %></div>
+  <h1><%= status === 404 ? 'Não encontrado' : status === 403 ? 'Acesso negado' : 'Algo deu errado' %></h1>
+  <p><%= mensagem %></p>
+  <a class="botao primario" href="/">Voltar ao início</a>
+</section>
+<% if (usuario) { %><%- include('../partials/rodape') %><% } else { %></main></body></html><% } %>

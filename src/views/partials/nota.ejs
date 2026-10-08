@@ -1,0 +1,2 @@
+<% const v = (valor === null || valor === undefined) ? null : Number(valor); const cls = v === null ? 'vazia' : v >= 7 ? 'boa' : v >= 5 ? 'media' : 'baixa'; %>
+<span class="nota nota-<%= cls %>" title="<%= v === null ? 'Sem dados' : (v >= 7 ? 'Acima da meta' : v >= 5 ? 'Atenção' : 'Abaixo do esperado') %>"><%= f.nota(v) %></span>

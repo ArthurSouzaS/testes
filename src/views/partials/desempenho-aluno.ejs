@@ -1,0 +1,10 @@
+<section class="cartao">
+  <h2>Evolução por trimestre</h2>
+  <div class="kpis">
+    <div class="kpi"><span>Média geral</span><%- include('nota',{valor: desempenho.mediaGeral}) %></div>
+    <div class="kpi"><span>Atividades avaliadas</span><strong><%= desempenho.notas.length %></strong></div>
+    <div class="kpi"><span>Conteúdos dominados</span><strong><%= desempenho.conteudos.filter((c) => c.situacao === 'dominado').length %></strong></div>
+  </div>
+  <% desempenho.etapas.forEach((e) => { %><%- include('barra',{rotulo: d.ETAPAS[e.etapa] + (e.qtd ? ` (${e.qtd})` : ''), valor: e.media}) %><% }) %>
+  <p class="dica">Médias de 0 a 10 das atividades corrigidas. Meta: 7,0.</p>
+</section>

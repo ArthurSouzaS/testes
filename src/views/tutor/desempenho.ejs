@@ -1,0 +1,16 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><div><p class="sobretitulo">Área do tutor</p><h1>Meu desempenho como tutor</h1></div></div>
+<p class="dica">Compare seus resultados por trimestre e por ano. O índice combina a avaliação dos seus tutorados e o desempenho deles nas atividades (RN12).</p>
+<% if (!lista.length) { %><p class="vazio cartao">Sem tutorias.</p><% } %>
+<% lista.forEach((t) => { %>
+  <section class="cartao"><div class="linha-acao"><h2><%= t.sala_nome %> · <%= t.ano_letivo %></h2><span class="linha-acao"><%- include('../partials/status',{status:t.status}) %><%- include('../partials/nota',{valor:t.desempenho.indiceGeral}) %></span></div>
+    <div class="grade-2"><div>
+      <% t.desempenho.etapas.forEach((e) => { %><%- include('../partials/barra',{rotulo: d.ETAPAS[e.etapa], valor: e.indice}) %><% }) %>
+      <p class="dica">Índice por trimestre (0–10).</p></div>
+      <table class="tabela compacta"><thead><tr><th>Trim.</th><th>Meus tutorados</th><th>Avaliação deles</th><th>Professor</th></tr></thead><tbody>
+        <% t.desempenho.etapas.forEach((e) => { %><tr><td><%= e.etapa %>º</td><td><%- include('../partials/nota',{valor:e.tutorados}) %></td><td><%- include('../partials/nota',{valor:e.alunos}) %></td><td><%- include('../partials/nota',{valor:e.professor}) %></td></tr><% }) %></tbody></table>
+    </div>
+    <p class="meta"><%= t.desempenho.contagem.correcoes %> correções · <%= t.desempenho.contagem.registros %> encontros registrados · <%= t.desempenho.contagem.materiais %> materiais · <%= t.desempenho.contagem.duvidas_respondidas %> dúvidas respondidas</p>
+  </section>
+<% }) %>
+<%- include('../partials/rodape') %>

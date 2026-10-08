@@ -1,0 +1,15 @@
+<%- include('../partials/topo') %>
+<%- include('../partials/abas-sala') %>
+<div class="grade-lateral">
+  <div>
+    <% if (!lista.length) { %><p class="vazio cartao">Nenhum aviso publicado.</p><% } %>
+    <% lista.forEach((a) => { %><article class="cartao aviso"><div class="linha-acao"><h3><%= a.titulo %></h3>
+      <form method="post" action="/professor/salas/<%= sala.id %>/avisos/<%= a.id %>/excluir" data-confirmar="Excluir este aviso?"><%- include('../partials/csrf') %><button class="botao link perigo pequeno">Excluir</button></form></div>
+      <p class="texto"><%= a.texto %></p><p class="meta"><%= f.dataHora(a.criado_em) %></p></article><% }) %>
+  </div>
+  <aside><section class="cartao destaque"><h2>Novo aviso</h2><p class="dica">Visível para todos os alunos e tutores da sala, que recebem notificação.</p>
+    <form method="post" action="/professor/salas/<%= sala.id %>/avisos" class="form"><%- include('../partials/csrf') %>
+      <label>Título<input name="titulo" required maxlength="120"></label><label>Mensagem<textarea name="texto" rows="5" required></textarea></label>
+      <button class="botao primario largo">Publicar aviso</button></form></section></aside>
+</div>
+<%- include('../partials/rodape') %>

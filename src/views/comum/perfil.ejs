@@ -1,0 +1,39 @@
+<%- include('../partials/topo') %>
+<div class="cabecalho"><h1>Meu perfil</h1></div>
+<div class="grade-2">
+  <section class="cartao">
+    <h2>Dados da conta</h2>
+    <dl class="dados"><dt>Nome</dt><dd><%= usuario.nome %></dd><dt>E-mail</dt><dd><%= usuario.email %></dd>
+      <dt>Perfil</dt><dd><%= usuario.papel === 'professor' ? 'Professor(a)' : 'Aluno(a)' %><%= tutorias.length ? ' · tutor(a) em ' + tutorias.length + ' tutoria(s)' : '' %></dd></dl>
+    <h3>Alterar senha</h3>
+    <form method="post" action="/perfil/senha" class="form">
+      <%- include('../partials/csrf') %>
+      <label>Senha atual<input type="password" name="atual" required autocomplete="current-password"></label>
+      <label>Nova senha<input type="password" name="nova" required minlength="8" autocomplete="new-password"></label>
+      <label>Confirme a nova senha<input type="password" name="confirmacao" required autocomplete="new-password"></label>
+      <button class="botao primario">Salvar nova senha</button>
+    </form>
+  </section>
+  <% if (usuario.papel === 'aluno') { %>
+  <section class="cartao">
+    <h2>Quero ser tutor(a)</h2>
+    <p class="dica">Seu pedido vai para o professor responsável, que pode aceitá-lo e indicar a sala (UC) em que você será tutor(a).</p>
+    <% if (!pedidos.some((p) => p.status === 'pendente')) { %>
+    <form method="post" action="/perfil/tutoria" class="form">
+      <%- include('../partials/csrf') %>
+      <label>Professor responsável<select name="professor_id" required><option value="">Selecione…</option>
+        <% professores.forEach((p) => { %><option value="<%= p.id %>"><%= p.nome %></option><% }) %></select></label>
+      <label>Mensagem (opcional)<textarea name="mensagem" rows="2" maxlength="500"></textarea></label>
+      <button class="botao primario">Enviar pedido</button>
+    </form>
+    <% } %>
+    <% if (pedidos.length) { %>
+      <h3>Meus pedidos</h3>
+      <ul class="lista-simples">
+        <% pedidos.forEach((p) => { %><li><span><%= p.professor_nome %> · <%= f.data(p.criado_em) %><%= p.sala_nome ? ' · ' + p.sala_nome : '' %><%= p.resposta ? ' — "' + p.resposta + '"' : '' %></span><%- include('../partials/status',{status:p.status}) %></li><% }) %>
+      </ul>
+    <% } %>
+  </section>
+  <% } %>
+</div>
+<%- include('../partials/rodape') %>

@@ -1,0 +1,9 @@
+<%- include('../auth/_topo') %>
+<main class="central largo" id="conteudo">
+  <h1>Caixa de saída (desenvolvimento)</h1>
+  <p class="dica">Sem SMTP configurado, os e-mails de confirmação aparecem aqui. Em produção configure SMTP_HOST (veja o README).</p>
+  <% if (!emails.length) { %><p class="vazio">Nenhum e-mail enviado ainda.</p><% } %>
+  <% emails.forEach((e) => { %>
+    <article class="cartao"><p class="meta">Para <strong><%= e.para %></strong> · <%= f.dataHora(e.criado_em) %></p><h3><%= e.assunto %></h3><div class="email-corpo"><%- e.html %></div></article>
+  <% }) %>
+</main></body></html>
